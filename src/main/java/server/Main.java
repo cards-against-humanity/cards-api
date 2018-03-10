@@ -2,6 +2,7 @@ package server;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import config.SwaggerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +19,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 @EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
-@SpringBootApplication @ComponentScan(basePackageClasses = { UserController.class, CardController.class, SearchController.class })
+@SpringBootApplication @ComponentScan(basePackageClasses = { UserController.class, CardController.class, SearchController.class, SwaggerConfig.class })
 public class Main extends WebMvcConfigurerAdapter {
     public static void main(String[] args) throws UnknownHostException {
         Map<String, Object> argMap = parseArgs(args);

@@ -75,7 +75,8 @@ class UserTest {
     fun equalsUser() {
         val u1 = User.get(ObjectId(userOne!!.id))
         val u2 = User.get(userOne!!.oAuthId, userOne!!.oAuthProvider)
-        assert(u1 == u2)
+        assert(u1.equals(u2))
+        assert (!u1.equals(null))
     }
 
     @Test

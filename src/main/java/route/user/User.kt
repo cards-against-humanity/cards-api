@@ -23,9 +23,6 @@ class User {
     }
 
     override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
-            return false
-        }
         if (obj is User) {
             return obj.id == this.id
         } else if (obj is Map<*, *>) {

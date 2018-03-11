@@ -42,10 +42,15 @@ public class UserControllerTest {
 
     @Test
     public void getById() throws Exception {
-        MockHttpServletRequestBuilder getReq = get("/user/" + userOne.getId());
-        ResultActions result = mockMvc.perform(getReq);
-        result.andExpect(status().isOk());
+        MockHttpServletRequestBuilder getReq;
+        ResultActions result;
+
+        getReq = get("/user/" + userOne.getId());
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
         assert resEquals(result, userOne);
+
+        getReq = get("/user/" + userOne.getId() + "asdf");
+        mockMvc.perform(getReq).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -63,5 +68,20 @@ public class UserControllerTest {
 
         getReq = get("/user");
         mockMvc.perform(getReq).andExpect(status().isBadRequest());
+
+        getReq = get("/user").param("oAuthId", userTwo.getOAuthId());
+        mockMvc.perform(getReq).andExpect(status().isBadRequest());
+
+        getReq = get("/user").param("oAuthProvider", userTwo.getOAuthProvider());
+        mockMvc.perform(getReq).andExpect(status().isBadRequest());
+
+        getReq = get("/user").param("oAuthId", userTwo.getOAuthId()).param("oAuthProvider", userTwo.getOAuthProvider()).param("id", userTwo.getId());
+        mockMvc.perform(getReq).andExpect(status().isBadRequest());
+
+        getReq = get("/user").param("id", "thisisafakeid");
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
+
+        getReq = get("/user").param("oAuthId", userTwo.getOAuthId()).param("oAuthProvider", "fakeoauthprovider");
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
     }
 }

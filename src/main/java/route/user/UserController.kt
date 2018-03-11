@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.*
 class UserController {
     @RequestMapping(value = "/user/{id}", method = arrayOf(RequestMethod.GET))
     @ApiOperation(value = "Get a user")
-    fun getUser(@PathVariable id: String): User {
-        return User.get(ObjectId(id))
+    fun getUser(@PathVariable id: String): ResponseEntity<User> {
+        try {
+            return ResponseEntity.ok(User.get(ObjectId(id)))
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().build()
+        }
     }
 
     @RequestMapping(value = "/user", method = arrayOf(RequestMethod.GET))
@@ -31,8 +35,8 @@ class UserController {
         }
 
         return try {
-            if (oAuthProvider != null) {
-                ResponseEntity.ok(User.get(oAuthId!!, oAuthProvider))
+            if (oAuthId != null && oAuthProvider != null) {
+                ResponseEntity.ok(User.get(oAuthId, oAuthProvider))
             } else {
                 ResponseEntity.ok(User.get(ObjectId(id!!)))
             }

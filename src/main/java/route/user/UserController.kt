@@ -19,8 +19,8 @@ class UserController {
     @ApiOperation(value = "Get a user")
     fun getUser(
             @RequestParam(value = "id", required = false) id: String?,
-            @RequestParam(value = "oauthprovider", required = false) oAuthProvider: String?,
-            @RequestParam(value = "oauthid", required = false) oAuthId: String?
+            @RequestParam(value = "oAuthProvider", required = false) oAuthProvider: String?,
+            @RequestParam(value = "oAuthId", required = false) oAuthId: String?
     ): ResponseEntity<User> {
         if ((oAuthProvider == null) xor (oAuthId == null)) {
             return ResponseEntity.badRequest().build()

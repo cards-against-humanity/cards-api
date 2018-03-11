@@ -1,4 +1,5 @@
 import com.mongodb.MongoClient
+import org.bson.Document
 
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
@@ -71,10 +72,19 @@ class UserTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsUser() {
         val u1 = User.get(ObjectId(userOne!!.id))
         val u2 = User.get(userOne!!.oAuthId, userOne!!.oAuthProvider)
         assert(u1 == u2)
+    }
+
+    @Test
+    fun equalsMap() {
+        val user = User.get(userOne!!.oAuthId, userOne!!.oAuthProvider)
+        val map = Document("id", user.id).append("name", user.name).append("oAuthId", user.oAuthId).append("oAuthProvider", user.oAuthProvider)
+        assert(user.equals(map))
+        map.append("name", user.name + "asdf")
+        assert(!user.equals(map))
     }
 
     @Test

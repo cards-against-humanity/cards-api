@@ -26,11 +26,12 @@ class User {
         if (obj == null) {
             return false
         }
-        if (!User::class.java.isAssignableFrom(obj.javaClass)) {
-            return false
+        if (obj is User) {
+            return obj.id == this.id
+        } else if (obj is Map<*, *>) {
+            return obj["id"] == id && obj["name"] == name && obj["oAuthId"] == oAuthId && obj["oAuthProvider"] == oAuthProvider
         }
-        val user = obj as User
-        return user.id == this.id
+        return false
     }
 
     fun setName(name: String): User {

@@ -96,4 +96,21 @@ class UserTest {
         assert(userOne!!.name == name)
         assert(userTwo!!.name == name)
     }
+
+    @Test
+    fun delete() {
+        User.get(ObjectId(userOne!!.id))
+        User.delete(userOne!!.id)
+        assertThrows(Exception::class.java) { User.get(ObjectId(userOne!!.id)) }
+
+        User.get(ObjectId(userTwo!!.id))
+        User.delete(userTwo!!.oAuthId, userTwo!!.oAuthProvider)
+        assertThrows(Exception::class.java) { User.get(ObjectId(userTwo!!.id)) }
+
+        var exception = assertThrows(Exception::class.java) { User.delete(userOne!!.id) }
+        assert(exception.message == "No user exists with ID: ${userOne!!.id}")
+
+        exception = assertThrows(Exception::class.java) { User.delete(userOne!!.oAuthId, userOne!!.oAuthProvider) }
+        assert(exception.message == "No user exists with oAuth ID of ${userOne!!.oAuthId} and oAuth Provider of ${userOne!!.oAuthProvider}")
+    }
 }

@@ -6,6 +6,7 @@ import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 @RestController
 class UserController {
@@ -50,7 +51,8 @@ class UserController {
     @ApiOperation(value = "Create a user")
     fun createUser(@RequestBody user: JsonUser): ResponseEntity<User> {
         return try {
-            ResponseEntity.ok(User.create(user.oAuthId!!, user.oAuthProvider!!, user.name!!))
+            val u = User.create(user.oAuthId!!, user.oAuthProvider!!, user.name!!)
+            ResponseEntity.created(URI("/user/${u.id}")).body(u)
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(null)
         }

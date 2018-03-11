@@ -80,12 +80,5 @@ class User {
                 throw Exception("No user exists with ID: $id")
             }
         }
-
-        fun delete(oAuthId: String, oAuthProvider: String) {
-            val deletedCount = users.deleteOne(Document("oAuthId", oAuthId).append("oAuthProvider", oAuthProvider)).deletedCount
-            if (deletedCount == 0L) {
-                throw Exception("No user exists with oAuth ID of $oAuthId and oAuth Provider of $oAuthProvider")
-            }
-        }
     }
 }

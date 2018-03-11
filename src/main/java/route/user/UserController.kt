@@ -20,7 +20,8 @@ class UserController {
     fun getUser(
             @RequestParam(value = "id", required = false) id: String?,
             @RequestParam(value = "oauthprovider", required = false) oAuthProvider: String?,
-            @RequestParam(value = "oauthid", required = false) oAuthId: String?): ResponseEntity<User> {
+            @RequestParam(value = "oauthid", required = false) oAuthId: String?
+    ): ResponseEntity<User> {
         if ((oAuthProvider == null) xor (oAuthId == null)) {
             return ResponseEntity.badRequest().build()
         } else if (id == null && oAuthProvider == null) {

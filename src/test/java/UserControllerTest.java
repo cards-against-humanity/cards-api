@@ -58,7 +58,7 @@ public class UserControllerTest {
         assert resEquals(result, userOne);
 
         getReq = get("/user/" + userOne.getId() + "asdf");
-        mockMvc.perform(getReq).andExpect(status().isBadRequest());
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class UserControllerTest {
                 .append("oAuthId", "123456")
                 .append("oAuthProvider", "google");
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson());
-        result = mockMvc.perform(putReq).andExpect(status().isCreated());
+        result = mockMvc.perform(putReq).andExpect(status().isOk());
         User createdUser = User.Companion.get(new ObjectId((String) toMap(result).get("id")));
         resEquals(result, createdUser);
 

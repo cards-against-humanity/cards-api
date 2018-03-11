@@ -1,6 +1,8 @@
 package route.user
 
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus
@@ -12,16 +14,25 @@ import java.net.URI
 class UserController {
     @RequestMapping(value = "/user/{id}", method = arrayOf(RequestMethod.GET))
     @ApiOperation(value = "Get a user")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User retrieved"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
     fun getUser(@PathVariable id: String): ResponseEntity<User> {
         return try {
             ResponseEntity.ok(User.get(ObjectId(id)))
         } catch (e: Exception) {
-            ResponseEntity.badRequest().build()
+            ResponseEntity.notFound().build()
         }
     }
 
     @RequestMapping(value = "/user", method = arrayOf(RequestMethod.GET))
     @ApiOperation(value = "Get a user")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User retrieved"),
+            ApiResponse(code = 400, message = "Illegal request parameters"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
     fun getUser(
             @RequestParam(value = "id", required = false) id: String?,
             @RequestParam(value = "oAuthProvider", required = false) oAuthProvider: String?,
@@ -49,10 +60,14 @@ class UserController {
 
     @RequestMapping(value = "/user", method = [(RequestMethod.PUT)])
     @ApiOperation(value = "Create a user")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "User created"),
+            ApiResponse(code = 400, message = "Invalid request body")
+    )
     fun createUser(@RequestBody user: JsonUser): ResponseEntity<User> {
         return try {
             val u = User.create(user.oAuthId!!, user.oAuthProvider!!, user.name!!)
-            ResponseEntity.created(URI("/user/${u.id}")).body(u)
+            ResponseEntity.ok(u)
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(null)
         }

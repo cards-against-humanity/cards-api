@@ -26,7 +26,10 @@ object Friend {
         val items = ArrayList<Document>()
         items.add(Document("senderId", friender.id).append("receiverId", friendee.id))
         items.add(Document("receiverId", friender.id).append("senderId", friendee.id))
-        friends.deleteMany(Document("\$or", items))
+        val deletedCount = friends.deleteMany(Document("\$or", items)).deletedCount
+        if (deletedCount == 0L) {
+            throw Exception("Users are not friends")
+        }
     }
 
     fun areFriends(userOne: User, userTwo: User): Boolean {

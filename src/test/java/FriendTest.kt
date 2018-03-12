@@ -111,6 +111,8 @@ class FriendTest {
         Friend.removeFriend(userTwo!!, userOne!!)
         assert(Friend.getSentRequests(userOne!!).isEmpty())
         assert(Friend.getReceivedRequests(userTwo!!).isEmpty())
+
+        assertThrows(Exception::class.java) { Friend.removeFriend(userOne!!, userTwo!!) }
     }
 
     @Test

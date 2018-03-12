@@ -92,9 +92,27 @@ class UserController {
 
     @RequestMapping(value = "/user/{userId}/friends/{friendId}", method = [RequestMethod.PUT])
     @ApiOperation(value = "Add a friend")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Friend added"),
+            ApiResponse(code = 400, message = "Users are already friends"),
+            ApiResponse(code = 404, message = "One or both of the users do not exist")
+    )
     fun addFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<HttpStatus> {
-        Friend.addFriend(User.get(ObjectId(userId)), User.get(ObjectId(friendId)))
-        return ResponseEntity(HttpStatus.CREATED)
+        var user: User? = null
+        var friend: User? = null
+        try {
+            user = User.get(ObjectId(userId))
+            friend = User.get(ObjectId(friendId))
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+
+        return try {
+            Friend.addFriend(user!!, friend!!)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().build()
+        }
     }
 
     @RequestMapping(value = "/user/{userId}/friends/{friendId}", method = [RequestMethod.DELETE])

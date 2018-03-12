@@ -111,4 +111,22 @@ public class UserControllerTest {
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson());
         mockMvc.perform(putReq).andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void addFriend() throws Exception {
+        MockHttpServletRequestBuilder putReq;
+        ResultActions result;
+
+        putReq = put("/user/" + userOne.getId() + "/friends/" + userTwo.getId());
+        mockMvc.perform(putReq).andExpect(status().isOk());
+
+        putReq = put("/user/" + userOne.getId() + "/friends/" + userTwo.getId());
+        mockMvc.perform(putReq).andExpect(status().isBadRequest());
+
+        putReq = put("/user/" + "thisisafakeid" + "/friends/" + userTwo.getId());
+        mockMvc.perform(putReq).andExpect(status().isNotFound());
+
+        putReq = put("/user/" + userOne.getId() + "/friends/" + userOne.getId());
+        mockMvc.perform(putReq).andExpect(status().isBadRequest());
+    }
 }

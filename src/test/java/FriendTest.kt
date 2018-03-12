@@ -112,4 +112,9 @@ class FriendTest {
         assert(Friend.getSentRequests(userOne!!).isEmpty())
         assert(Friend.getReceivedRequests(userTwo!!).isEmpty())
     }
+
+    @Test
+    fun addSelfAsFriend() {
+        assertThrows(Exception::class.java) { Friend.addFriend(userOne!!, userOne!!) }
+    }
 }

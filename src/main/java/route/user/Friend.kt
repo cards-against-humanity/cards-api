@@ -16,6 +16,9 @@ object Friend {
     }
 
     fun addFriend(friender: User, friendee: User) {
+        if (friender == friendee) {
+            throw Exception("Cannot add yourself as a friend")
+        }
         friends.insertOne(Document("senderId", friender.id).append("receiverId", friendee.id))
     }
 

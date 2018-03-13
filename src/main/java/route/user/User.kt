@@ -73,12 +73,5 @@ class User {
             )
             return get(id)
         }
-
-        fun delete(id: String) {
-            val deletedCount = users.deleteOne(Document("_id", ObjectId(id))).deletedCount
-            if (deletedCount == 0L) {
-                throw Exception("No user exists with ID: $id")
-            }
-        }
     }
 }

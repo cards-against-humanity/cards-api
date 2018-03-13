@@ -15,7 +15,9 @@ import route.user.User;
 import route.user.UserController;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -37,6 +39,10 @@ public class UserControllerTest {
 
     private Map<String, Object> toMap(ResultActions result) throws Exception {
         return new ObjectMapper().readValue(result.andReturn().getResponse().getContentAsString(), HashMap.class);
+    }
+
+    private List<Object> toList(ResultActions result) throws Exception {
+        return new ObjectMapper().readValue(result.andReturn().getResponse().getContentAsString(), ArrayList.class);
     }
 
     private boolean resEquals(ResultActions result, Object obj) throws Exception {
@@ -117,7 +123,6 @@ public class UserControllerTest {
     @Test
     public void addFriend() throws Exception {
         MockHttpServletRequestBuilder putReq;
-        ResultActions result;
 
         putReq = put("/user/" + userOne.getId() + "/friends/" + userTwo.getId());
         mockMvc.perform(putReq).andExpect(status().isOk());
@@ -135,7 +140,6 @@ public class UserControllerTest {
     @Test
     public void removeFriend() throws Exception {
         MockHttpServletRequestBuilder deleteReq;
-        ResultActions result;
 
         Friend.INSTANCE.addFriend(userOne, userTwo);
         deleteReq = delete("/user/" + userOne.getId() + "/friends/" + userTwo.getId());
@@ -146,5 +150,55 @@ public class UserControllerTest {
 
         deleteReq = delete("/user/" + "thisisafakeid" + "/friends/" + userTwo.getId());
         mockMvc.perform(deleteReq).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getFriends() throws Exception {
+        MockHttpServletRequestBuilder getReq;
+        ResultActions result;
+
+        getReq = get("/user/" + userOne.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        Friend.INSTANCE.addFriend(userOne, userTwo);
+
+        getReq = get("/user/" + userOne.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        Friend.INSTANCE.addFriend(userTwo, userOne);
+
+        getReq = get("/user/" + userOne.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 1;
+        assert userTwo.equals(toList(result).get(0));
+
+        getReq = get("/user/" + userTwo.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 1;
+        assert userOne.equals(toList(result).get(0));
+
+        Friend.INSTANCE.removeFriend(userOne, userTwo);
+
+        getReq = get("/user/" + userOne.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+
+        getReq = get("/user/" + "thisisafakeid" + "/friends");
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
     }
 }

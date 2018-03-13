@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.bson.Document
 import org.bson.types.ObjectId
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -142,8 +141,17 @@ class UserController {
 
     @RequestMapping(value = "/user/{id}/friends", method = [RequestMethod.GET])
     @ApiOperation(value = "Get friends")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Friends retrieved"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
     fun getFriends(@PathVariable id: String): ResponseEntity<List<User>> {
-        return ResponseEntity.ok(Friend.getFriends(User.get(ObjectId(id))))
+        return try {
+            val user = User.get(ObjectId(id))
+            ResponseEntity.ok(Friend.getFriends(user))
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
     }
 
     @RequestMapping(value = "/user/{id}/friends/requests/sent", method = [RequestMethod.GET])

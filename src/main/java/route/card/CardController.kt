@@ -1,6 +1,5 @@
 package route.card
 
-import io.swagger.annotations.Api
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity

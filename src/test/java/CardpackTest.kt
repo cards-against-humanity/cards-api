@@ -37,7 +37,9 @@ class CardpackTest {
     @Test
     fun equals() {
         val pack = Cardpack.create("pack", userOne!!)
-        assert(pack == Cardpack.get(ObjectId(pack.id)))
+        assert(pack.equals(Cardpack.get(ObjectId(pack.id))))
+        assert(!pack.equals(null))
+        assert(!pack.equals(Object()))
     }
 
     @Test

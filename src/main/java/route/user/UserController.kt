@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 class UserController {
-    @RequestMapping(value = "/user/{id}", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/user/{id}", method = [RequestMethod.GET])
     @ApiOperation(value = "Get a user")
     @ApiResponses(
             ApiResponse(code = 200, message = "User retrieved"),
@@ -25,7 +25,7 @@ class UserController {
         }
     }
 
-    @RequestMapping(value = "/user", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/user", method = [RequestMethod.GET])
     @ApiOperation(value = "Get a user")
     @ApiResponses(
             ApiResponse(code = 200, message = "User retrieved"),
@@ -57,7 +57,7 @@ class UserController {
 
     }
 
-    @RequestMapping(value = "/user", method = [(RequestMethod.PUT)])
+    @RequestMapping(value = "/user", method = [RequestMethod.PUT])
     @ApiOperation(value = "Create a user")
     @ApiResponses(
             ApiResponse(code = 200, message = "User created"),

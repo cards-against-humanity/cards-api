@@ -156,13 +156,31 @@ class UserController {
 
     @RequestMapping(value = "/user/{id}/friends/requests/sent", method = [RequestMethod.GET])
     @ApiOperation(value = "Get friend requests sent to other users")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Friend requests retrieved"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
     fun getFriendRequestsSent(@PathVariable id: String): ResponseEntity<List<User>> {
-        return ResponseEntity.ok(Friend.getSentRequests(User.get(ObjectId(id))))
+        return try {
+            val user = User.get(ObjectId(id))
+            ResponseEntity.ok(Friend.getSentRequests(user))
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
     }
 
     @RequestMapping(value = "/user/{id}/friends/requests/received", method = [RequestMethod.GET])
     @ApiOperation(value = "Get friend requests received from other users")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Friend requests retrieved"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
     fun getFriendRequestsReceived(@PathVariable id: String): ResponseEntity<List<User>> {
-        return ResponseEntity.ok(Friend.getReceivedRequests(User.get(ObjectId(id))))
+        return try {
+            val user = User.get(ObjectId(id))
+            ResponseEntity.ok(Friend.getReceivedRequests(user))
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
     }
 }

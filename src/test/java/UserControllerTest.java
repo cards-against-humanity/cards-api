@@ -201,4 +201,64 @@ public class UserControllerTest {
         getReq = get("/user/" + "thisisafakeid" + "/friends");
         mockMvc.perform(getReq).andExpect(status().isNotFound());
     }
+
+    @Test
+    public void getFriendRequests() throws Exception {
+        MockHttpServletRequestBuilder getReq;
+        ResultActions result;
+
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        Friend.INSTANCE.addFriend(userOne, userTwo);
+
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 1;
+        assert userTwo.equals(toList(result).get(0));
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 1;
+        assert userOne.equals(toList(result).get(0));
+
+        Friend.INSTANCE.addFriend(userTwo, userOne);
+
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+        getReq = get("/user/" + userOne.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/sent");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+        getReq = get("/user/" + userTwo.getId() + "/friends/requests/received");
+        result = mockMvc.perform(getReq).andExpect(status().isOk());
+        assert toList(result).size() == 0;
+
+
+        getReq = get("/user/" + "thisisafakeid" + "/friends/requests/sent");
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
+        getReq = get("/user/" + "thisisafakeid" + "/friends/requests/received");
+        mockMvc.perform(getReq).andExpect(status().isNotFound());
+    }
 }

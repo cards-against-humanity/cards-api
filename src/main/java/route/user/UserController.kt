@@ -97,9 +97,9 @@ class UserController {
             ApiResponse(code = 400, message = "Users are already friends"),
             ApiResponse(code = 404, message = "One or both of the users do not exist")
     )
-    fun addFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<HttpStatus> {
-        var user: User? = null
-        var friend: User? = null
+    fun addFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<Void> {
+        var user: User?
+        var friend: User?
         try {
             user = User.get(ObjectId(userId))
             friend = User.get(ObjectId(friendId))
@@ -108,7 +108,7 @@ class UserController {
         }
 
         return try {
-            Friend.addFriend(user!!, friend!!)
+            Friend.addFriend(user, friend)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -117,9 +117,27 @@ class UserController {
 
     @RequestMapping(value = "/user/{userId}/friends/{friendId}", method = [RequestMethod.DELETE])
     @ApiOperation(value = "Remove a friend")
-    fun removeFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<*> {
-        Friend.removeFriend(User.get(ObjectId(userId)), User.get(ObjectId(friendId)))
-        return ResponseEntity.ok().build<Any>()
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Friend removed"),
+            ApiResponse(code = 400, message = "Users are not friends"),
+            ApiResponse(code = 404, message = "One or both of the users do not exist")
+    )
+    fun removeFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<Void> {
+        var user: User?
+        var friend: User?
+        try {
+            user = User.get(ObjectId(userId))
+            friend = User.get(ObjectId(friendId))
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+
+        return try {
+            Friend.removeFriend(user, friend)
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().build()
+        }
     }
 
     @RequestMapping(value = "/user/{id}/friends", method = [RequestMethod.GET])

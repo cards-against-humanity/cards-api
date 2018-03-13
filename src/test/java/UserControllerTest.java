@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import route.user.Friend;
 import route.user.User;
 import route.user.UserController;
 
@@ -17,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -128,5 +130,21 @@ public class UserControllerTest {
 
         putReq = put("/user/" + userOne.getId() + "/friends/" + userOne.getId());
         mockMvc.perform(putReq).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void removeFriend() throws Exception {
+        MockHttpServletRequestBuilder deleteReq;
+        ResultActions result;
+
+        Friend.INSTANCE.addFriend(userOne, userTwo);
+        deleteReq = delete("/user/" + userOne.getId() + "/friends/" + userTwo.getId());
+        mockMvc.perform(deleteReq).andExpect(status().isOk());
+
+        deleteReq = delete("/user/" + userOne.getId() + "/friends/" + userOne.getId());
+        mockMvc.perform(deleteReq).andExpect(status().isBadRequest());
+
+        deleteReq = delete("/user/" + "thisisafakeid" + "/friends/" + userTwo.getId());
+        mockMvc.perform(deleteReq).andExpect(status().isNotFound());
     }
 }

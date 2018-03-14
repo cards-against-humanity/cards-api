@@ -73,19 +73,20 @@ class UserController {
 
     @RequestMapping(value = "/user/{id}", method = [RequestMethod.PATCH])
     @ApiOperation(value = "Edit a user")
-    fun patchUser(@RequestBody patchDoc: List<Document>, @PathVariable id: String): ResponseEntity<*> {
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Patch succeeded"),
+            ApiResponse(code = 400, message = "Invalid request body")
+    )
+    fun patchUser(@RequestBody patchDoc: List<JsonUserPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
         patchDoc.forEach({ doc ->
             run {
-                val op = doc["op"] as String
-                val path = doc["path"] as String
-                val value = doc["value"]
-
-                if (op == "replace" && path == "/name") {
-                    User.get(ObjectId(id)).setName(value as String)
+                when {
+                    doc.op == "replace" && doc.path == "/name" -> User.get(ObjectId(id)).setName(doc.value as String)
+                    else -> return ResponseEntity.badRequest().build()
                 }
             }
         })
-        return ResponseEntity.ok().build<Any>()
+        return ResponseEntity.ok().build()
     }
 
 

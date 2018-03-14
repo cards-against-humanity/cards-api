@@ -14,15 +14,12 @@ import route.user.Friend;
 import route.user.User;
 import route.user.UserController;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest {
@@ -260,5 +257,33 @@ public class UserControllerTest {
         mockMvc.perform(getReq).andExpect(status().isNotFound());
         getReq = get("/user/" + "thisisafakeid" + "/friends/requests/received");
         mockMvc.perform(getReq).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void patchUser() throws Exception {
+        MockHttpServletRequestBuilder patchReq;
+        ResultActions result;
+        List<Document> patchList;
+
+        patchReq = patch("/user/" + userOne.getId()).contentType(MediaType.APPLICATION_JSON).content(new Document("foo", "bar").toJson());
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest());
+
+        patchList = new ArrayList<>();
+        patchList.add(new Document("foo", "bar"));
+        patchReq = patch("/user/" + userOne.getId()).contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(patchList));
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest());
+        assert User.Companion.get(new ObjectId(userOne.getId())).getName().equals(userOne.getName());
+
+        patchList = new ArrayList<>();
+        patchList.add(new Document("op", "replace").append("path", "/fakepath"));
+        patchReq = patch("/user/" + userOne.getId()).contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(patchList));
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest());
+        assert User.Companion.get(new ObjectId(userOne.getId())).getName().equals(userOne.getName());
+
+        patchList = new ArrayList<>();
+        patchList.add(new Document("op", "replace").append("path", "/name").append("value", "newName"));
+        patchReq = patch("/user/" + userOne.getId()).contentType(MediaType.APPLICATION_JSON).content(new ObjectMapper().writeValueAsString(patchList));
+        mockMvc.perform(patchReq).andExpect(status().isOk());
+        assert User.Companion.get(new ObjectId(userOne.getId())).getName().equals("newName");
     }
 }

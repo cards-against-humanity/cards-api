@@ -6,7 +6,7 @@ import org.bson.types.ObjectId
 
 class Card {
 
-    @JsonProperty("_id")        var id:         String private set
+    @JsonProperty("id")         var id:         String private set
     @JsonProperty("text")       var text:       String private set
     @JsonProperty("cardpackId") var cardpackId: String private set
 

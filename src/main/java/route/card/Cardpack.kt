@@ -7,7 +7,7 @@ import route.user.User
 
 class Cardpack {
 
-    @JsonProperty("_id")        var id:         String private set
+    @JsonProperty("id")        var id:         String private set
     @JsonProperty("name")       var name:       String private set
     @JsonProperty("ownerId")    var ownerId:    String private set
 

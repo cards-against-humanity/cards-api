@@ -120,10 +120,10 @@ object Friend {
     private class FriendTuple(val senderId: ObjectId, val receiverId: ObjectId) {
 
         fun getOtherUserId(user: User): ObjectId {
-            return when {
-                senderId.toString() == user.id -> receiverId
-                receiverId.toString() == user.id -> senderId
-                else -> throw IllegalArgumentException("User specified does not belong to either ID")
+            return if (senderId.toString() == user.id) {
+                receiverId
+            } else {
+                senderId
             }
         }
     }

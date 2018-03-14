@@ -27,6 +27,14 @@ class UserControllerTest {
     private var userOne: User? = null
     private var userTwo: User? = null
 
+    companion object {
+
+        @BeforeAll
+        fun initialize() {
+            database.Instance.mongo = MongoClient("localhost").getDatabase("appNameTest")
+        }
+    }
+
     @BeforeEach
     fun reset() {
         database.Instance.resetMongo()
@@ -42,7 +50,7 @@ class UserControllerTest {
 
         getReq = get("/user/" + userOne!!.id)
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(resEquals(result, userOne))
+        assert(resEquals(result, userOne!!))
 
         getReq = get("/user/" + userOne!!.id + "asdf")
         mockMvc.perform(getReq).andExpect(status().isNotFound)
@@ -56,11 +64,11 @@ class UserControllerTest {
 
         getReq = get("/user").param("id", userTwo!!.id)
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(resEquals(result, userTwo))
+        assert(resEquals(result, userTwo!!))
 
         getReq = get("/user").param("oAuthId", userTwo!!.oAuthId).param("oAuthProvider", userTwo!!.oAuthProvider)
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(resEquals(result, userTwo))
+        assert(resEquals(result, userTwo!!))
 
         getReq = get("/user")
         mockMvc.perform(getReq).andExpect(status().isBadRequest)
@@ -86,12 +94,11 @@ class UserControllerTest {
     fun putUser() {
         var putReq: MockHttpServletRequestBuilder
         val result: ResultActions
-        val userDoc: Document
-
-        userDoc = Document()
+        val userDoc: Document = Document()
                 .append("name", "Hulk Hogan")
                 .append("oAuthId", "123456")
                 .append("oAuthProvider", "google")
+
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson())
         result = mockMvc.perform(putReq).andExpect(status().isOk)
         val createdUser = User.get(ObjectId(toMap(result)["id"] as String))
@@ -143,43 +150,43 @@ class UserControllerTest {
 
         getReq = get("/user/" + userOne!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         Friend.addFriend(userOne!!, userTwo!!)
 
         getReq = get("/user/" + userOne!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         Friend.addFriend(userTwo!!, userOne!!)
 
         getReq = get("/user/" + userOne!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 1)
+        assert(toList(result).size == 1)
         assert(userTwo == toList(result)[0])
 
         getReq = get("/user/" + userTwo!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 1)
+        assert(toList(result).size == 1)
         assert(userOne == toList(result)[0])
 
         Friend.removeFriend(userOne!!, userTwo!!)
 
         getReq = get("/user/" + userOne!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
 
         getReq = get("/user/" + "thisisafakeid" + "/friends")
@@ -194,51 +201,51 @@ class UserControllerTest {
 
         getReq = get("/user/" + userOne!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
         getReq = get("/user/" + userOne!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         Friend.addFriend(userOne!!, userTwo!!)
 
         getReq = get("/user/" + userOne!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 1)
+        assert(toList(result).size == 1)
         assert(userTwo == toList(result)[0])
         getReq = get("/user/" + userOne!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 1)
+        assert(toList(result).size == 1)
         assert(userOne == toList(result)[0])
 
         Friend.addFriend(userTwo!!, userOne!!)
 
         getReq = get("/user/" + userOne!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
         getReq = get("/user/" + userOne!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
         getReq = get("/user/" + userTwo!!.id + "/friends/requests/received")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
-        assert(toList(result).size() === 0)
+        assert(toList(result).isEmpty())
 
 
         getReq = get("/user/" + "thisisafakeid" + "/friends/requests/sent")
@@ -251,7 +258,6 @@ class UserControllerTest {
     @Throws(Exception::class)
     fun patchUser() {
         var patchReq: MockHttpServletRequestBuilder
-        val result: ResultActions
         var patchList: MutableList<Document>
 
         patchReq = patch("/user/" + userOne!!.id).contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
@@ -274,13 +280,5 @@ class UserControllerTest {
         patchReq = patch("/user/" + userOne!!.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isOk)
         assert(User.get(ObjectId(userOne!!.id)).name == "newName")
-    }
-
-    companion object {
-
-        @BeforeAll
-        fun initialize() {
-            database.Instance.mongo = MongoClient("localhost").getDatabase("appNameTest")
-        }
     }
 }

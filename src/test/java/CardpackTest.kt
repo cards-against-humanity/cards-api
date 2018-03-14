@@ -43,6 +43,12 @@ class CardpackTest {
     }
 
     @Test
+    fun getById() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        assert(cardpack == Cardpack.get(ObjectId(cardpack.id)))
+    }
+
+    @Test
     fun getByUser() {
         assert(Cardpack.get(userOne!!).isEmpty())
         assert(Cardpack.get(userTwo!!).isEmpty())
@@ -56,15 +62,32 @@ class CardpackTest {
 
     @Test
     fun getCards() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
-        val length = 100
+        var cardpack: Cardpack
+        var length: Int
+        var cards: List<Card>
+
+        cardpack = Cardpack.create("cardpack", userOne!!)
+        length = 100
         for (i in 0 until length) {
             Card.create("card" + i, cardpack)
         }
-        val cards = cardpack.getCards()
+        cards = cardpack.getCards()
         assert(cards.size == length)
         for (i in 0 until length) {
             assert(cards[i].text == "card" + i)
+            assert(cards[i].cardpackId == cardpack.id)
+        }
+
+        cardpack = Cardpack.create("cardpack", userTwo!!)
+        length = 50
+        for (i in 0 until length) {
+            Card.create("card" + i, cardpack)
+        }
+        cards = cardpack.getCards()
+        assert(cards.size == length)
+        for (i in 0 until length) {
+            assert(cards[i].text == "card" + i)
+            assert(cards[i].cardpackId == cardpack.id)
         }
     }
 

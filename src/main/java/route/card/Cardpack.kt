@@ -7,9 +7,9 @@ import route.user.User
 
 class Cardpack {
 
-    @JsonProperty("id")        var id:         String private set
-    @JsonProperty("name")       var name:       String private set
-    @JsonProperty("ownerId")    var ownerId:    String private set
+    @JsonProperty("id")      var id:      String private set
+    @JsonProperty("name")    var name:    String private set
+    @JsonProperty("ownerId") var ownerId: String private set
 
     override fun equals(obj: Any?): Boolean {
         if (obj == null) {
@@ -19,7 +19,7 @@ class Cardpack {
             return false
         }
         val cardpack = obj as Cardpack
-        return cardpack.id == this.id
+        return cardpack.id == this.id && cardpack.name == this.name && cardpack.ownerId == this.ownerId
     }
 
     private constructor(doc: Document) {

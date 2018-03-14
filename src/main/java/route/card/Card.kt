@@ -18,7 +18,7 @@ class Card {
             return false
         }
         val card = obj as Card
-        return card.id == this.id
+        return card.id == this.id && card.text == this.text && card.cardpackId == this.cardpackId
     }
 
     private constructor(doc: Document) {

@@ -30,11 +30,24 @@ class CardTest {
     }
 
     @Test
+    fun create() {
+        val text = "card_text"
+        val card = Card.create(text, cardpackOne!!)
+        assert(card.text == text)
+        assert(card.cardpackId == cardpackOne!!.id)
+    }
+
+    @Test
     fun equals() {
         assert(!cardOne!!.equals(null))
         assert(cardOne!!.equals(Card.get(ObjectId(cardOne!!.id))))
         assert(!cardOne!!.equals(Card.create("foo", cardpackOne!!)))
         assert(!cardOne!!.equals(Object()))
+    }
+
+    @Test
+    fun getById() {
+        assert(Card.get(ObjectId(cardOne!!.id)) == cardOne)
     }
 
     @Test

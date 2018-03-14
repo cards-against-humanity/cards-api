@@ -31,8 +31,10 @@ class CardTest {
 
     @Test
     fun equals() {
-        val cardTwo = Card.get(ObjectId(cardOne!!.id))
-        assert(cardOne!! == cardTwo)
+        assert(!cardOne!!.equals(null))
+        assert(cardOne!!.equals(Card.get(ObjectId(cardOne!!.id))))
+        assert(!cardOne!!.equals(Card.create("foo", cardpackOne!!)))
+        assert(!cardOne!!.equals(Object()))
     }
 
     @Test

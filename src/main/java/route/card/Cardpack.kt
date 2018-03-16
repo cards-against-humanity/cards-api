@@ -49,6 +49,13 @@ class Cardpack {
             return cardpacks.find(Document("ownerId", user.id)).toList().map { Cardpack(it) }
         }
 
+        fun delete(id: ObjectId) {
+            val deleted = cardpacks.deleteOne(Document("_id", id)).deletedCount == 1L
+            if (!deleted) {
+                throw Exception("Cardpack was not found")
+            }
+        }
+
         fun create(name: String, owner: User): Cardpack {
             val id = ObjectId()
             cardpacks.insertOne(Document()

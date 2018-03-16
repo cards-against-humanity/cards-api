@@ -1,5 +1,6 @@
 import com.mongodb.MongoClient
 import org.bson.types.ObjectId
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -99,5 +100,15 @@ class CardpackTest {
         val cardpack2 = Cardpack.get(ObjectId(cardpack1.id))
         assert(cardpack1.name == name)
         assert(cardpack2.name == name)
+    }
+
+    @Test
+    fun delete() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        Cardpack.get(ObjectId(cardpack.id))
+        Cardpack.delete(ObjectId(cardpack.id))
+        assertThrows(Exception::class.java) { Cardpack.get(ObjectId(cardpack.id)) }
+
+        assertThrows(Exception::class.java) { Cardpack.delete(ObjectId(cardpack.id)) }
     }
 }

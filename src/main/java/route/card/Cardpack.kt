@@ -1,5 +1,6 @@
 package route.card
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -12,14 +13,12 @@ class Cardpack {
     @JsonProperty("ownerId") var ownerId: String private set
 
     override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
-            return false
+        return when (obj) {
+            null -> false
+            is Cardpack -> obj.id == this.id && obj.name == this.name && obj.ownerId == this.ownerId
+            is Map<*, *> -> obj["id"] == this.id && obj["name"] == this.name && obj["ownerId"] == this.ownerId
+            else -> false
         }
-        if (!Cardpack::class.java.isAssignableFrom(obj.javaClass)) {
-            return false
-        }
-        val cardpack = obj as Cardpack
-        return cardpack.id == this.id && cardpack.name == this.name && cardpack.ownerId == this.ownerId
     }
 
     private constructor(doc: Document) {
@@ -28,6 +27,7 @@ class Cardpack {
         ownerId = doc["ownerId"].toString()
     }
 
+    @JsonIgnore
     fun getCards(): List<Card> {
         return Card.get(this)
     }

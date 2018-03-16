@@ -75,13 +75,22 @@ class UserController {
     @ApiOperation(value = "Edit a user")
     @ApiResponses(
             ApiResponse(code = 200, message = "Patch succeeded"),
-            ApiResponse(code = 400, message = "Invalid request body")
+            ApiResponse(code = 400, message = "Invalid request body"),
+            ApiResponse(code = 404, message = "User does not exist")
     )
     fun patchUser(@RequestBody patchDoc: List<JsonPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
+        val user: User
+
+        try {
+            user = User.get(ObjectId(id))
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+
         patchDoc.forEach({ doc ->
             run {
                 when {
-                    doc.op == "replace" && doc.path == "/name" -> User.get(ObjectId(id)).setName(doc.value as String)
+                    doc.op == "replace" && doc.path == "/name" -> user.setName(doc.value as String)
                     else -> return ResponseEntity.badRequest().build()
                 }
             }

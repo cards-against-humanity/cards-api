@@ -24,7 +24,7 @@ class User {
 
     override fun equals(obj: Any?): Boolean {
         if (obj is User) {
-            return obj.id == this.id
+            return obj.id == this.id && obj.name == this.name && obj.oAuthId == this.oAuthId && obj.oAuthProvider == this.oAuthProvider
         } else if (obj is Map<*, *>) {
             return obj["id"] == id && obj["name"] == name && obj["oAuthId"] == oAuthId && obj["oAuthProvider"] == oAuthProvider
         }

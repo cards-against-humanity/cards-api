@@ -3,10 +3,10 @@ package route.user
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import route.JsonPatchItem
 
 @RestController
 class UserController {
@@ -77,7 +77,7 @@ class UserController {
             ApiResponse(code = 200, message = "Patch succeeded"),
             ApiResponse(code = 400, message = "Invalid request body")
     )
-    fun patchUser(@RequestBody patchDoc: List<JsonUserPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
+    fun patchUser(@RequestBody patchDoc: List<JsonPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
         patchDoc.forEach({ doc ->
             run {
                 when {

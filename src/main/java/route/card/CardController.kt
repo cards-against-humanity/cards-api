@@ -77,11 +77,21 @@ class CardController {
         return ResponseEntity.ok().build()
     }
 
-//    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.DELETE])
-//    fun deleteCardpack(@RequestBody doc: Document, @PathVariable id: String): ResponseEntity<*>? {
-//        return null
-//    }
-//
+    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.DELETE])
+    @ApiOperation(value = "Delete a cardpack")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cardpack successfully deleted"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun deleteCardpack(@PathVariable id: String): ResponseEntity<Void> {
+        return try {
+            Cardpack.delete(ObjectId(id))
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
+    }
+
 //    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PUT])
 //    fun createCard(@RequestBody userDoc: Document, @PathVariable id: String): ResponseEntity<Card>? {
 //        // TODO - Allow single card or array

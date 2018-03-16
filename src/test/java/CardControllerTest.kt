@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.MongoClient
 import org.bson.Document
 import org.bson.types.ObjectId
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -106,5 +107,19 @@ class CardControllerTest {
         patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isOk)
         assert(Cardpack.get(ObjectId(cardpack.id)).name == "newName")
+    }
+
+    @Test
+    fun deleteCardpack() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        var deleteReq: MockHttpServletRequestBuilder
+
+        deleteReq = delete("/cardpack/" + cardpack.id)
+        mockMvc.perform(deleteReq).andExpect(status().isOk)
+
+        assertThrows(Exception::class.java) { Cardpack.get(ObjectId(cardpack.id)) }
+
+        deleteReq = delete("/cardpack/" + "fake_cardpack_id")
+        mockMvc.perform(deleteReq).andExpect(status().isNotFound)
     }
 }

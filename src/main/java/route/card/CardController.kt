@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import route.JsonPatchItem
 import route.user.User
 
 @RestController
@@ -49,11 +50,33 @@ class CardController {
         }
     }
 
-//    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PATCH])
-//    fun patchCardpack(@RequestBody patchDoc: List<Document>, @PathVariable id: String): ResponseEntity<*>? {
-//        return null
-//    }
-//
+    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PATCH])
+    @ApiOperation(value = "Edit a cardpack")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Patch succeeded"),
+            ApiResponse(code = 400, message = "Invalid request body"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun patchCardpack(@RequestBody patchDoc: List<JsonPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
+        val cardpack: Cardpack
+
+        try {
+            cardpack = Cardpack.get(ObjectId(id))
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+
+        patchDoc.forEach({ doc ->
+            run {
+                when {
+                    doc.op == "replace" && doc.path == "/name" -> cardpack.setName(doc.value as String)
+                    else -> return ResponseEntity.badRequest().build()
+                }
+            }
+        })
+        return ResponseEntity.ok().build()
+    }
+
 //    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.DELETE])
 //    fun deleteCardpack(@RequestBody doc: Document, @PathVariable id: String): ResponseEntity<*>? {
 //        return null

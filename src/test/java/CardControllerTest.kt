@@ -1,5 +1,7 @@
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.MongoClient
 import org.bson.Document
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,6 +15,7 @@ import route.user.User
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import route.card.Cardpack
+import java.util.ArrayList
 
 class CardControllerTest {
     private val mockMvc = MockMvcBuilders.standaloneSetup(CardController()).build()
@@ -71,5 +74,37 @@ class CardControllerTest {
 
         getReq = get("/cardpack/fakecardpackid")
         mockMvc.perform(getReq).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun patchCardpack() {
+        var patchReq: MockHttpServletRequestBuilder
+        var patchList: MutableList<Document>
+        val cardpack = Cardpack.create("cardpackOne", userOne!!)
+
+        patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest)
+
+        patchList = ArrayList()
+        patchReq = patch("/cardpack/" + "fakeuserid").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
+        mockMvc.perform(patchReq).andExpect(status().isNotFound)
+
+        patchList = ArrayList()
+        patchList.add(Document("foo", "bar"))
+        patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest)
+        assert(Cardpack.get(ObjectId(cardpack.id)) == cardpack)
+
+        patchList = ArrayList()
+        patchList.add(Document("op", "replace").append("path", "/fakepath"))
+        patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
+        mockMvc.perform(patchReq).andExpect(status().isBadRequest)
+        assert(Cardpack.get(ObjectId(cardpack.id)) == cardpack)
+
+        patchList = ArrayList()
+        patchList.add(Document("op", "replace").append("path", "/name").append("value", "newName"))
+        patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
+        mockMvc.perform(patchReq).andExpect(status().isOk)
+        assert(Cardpack.get(ObjectId(cardpack.id)).name == "newName")
     }
 }

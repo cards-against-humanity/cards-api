@@ -261,10 +261,10 @@ class UserControllerTest {
         var patchReq: MockHttpServletRequestBuilder
         var patchList: List<Document>
 
-        patchList = ArrayList()
         patchReq = patch("/user/" + userOne!!.id).contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
 
+        patchList = ArrayList()
         patchReq = patch("/user/" + "fakeuserid").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isNotFound)
 

@@ -34,11 +34,21 @@ class CardController {
         }
     }
 
-//    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.GET])
-//    fun getCardpack(@PathVariable id: String): ResponseEntity<Cardpack> {
-//        return ResponseEntity.ok(Cardpack.get(ObjectId(id)))
-//    }
-//
+    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.GET])
+    @ApiOperation(value = "Get a cardpack")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cardpack retrieved"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun getCardpack(@PathVariable id: String): ResponseEntity<Cardpack> {
+        return try {
+            val cardpack = Cardpack.get(ObjectId(id))
+            ResponseEntity.ok(cardpack)
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
+    }
+
 //    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PATCH])
 //    fun patchCardpack(@RequestBody patchDoc: List<Document>, @PathVariable id: String): ResponseEntity<*>? {
 //        return null

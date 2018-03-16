@@ -58,4 +58,18 @@ class CardControllerTest {
         putReq = put("/${userOne!!.id}/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
         mockMvc.perform(putReq).andExpect(status().isBadRequest)
     }
+
+    @Test
+    fun getCardpack() {
+        var getReq: MockHttpServletRequestBuilder
+        val result: ResultActions
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+
+        getReq = get("/cardpack/${cardpack.id}")
+        result = mockMvc.perform(getReq).andExpect(status().isOk)
+        assert(resEquals(result, cardpack))
+
+        getReq = get("/cardpack/fakecardpackid")
+        mockMvc.perform(getReq).andExpect(status().isNotFound)
+    }
 }

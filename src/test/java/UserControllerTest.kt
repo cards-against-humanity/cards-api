@@ -30,6 +30,7 @@ class UserControllerTest {
     companion object {
 
         @BeforeAll
+        @JvmStatic
         fun initialize() {
             database.Instance.mongo = MongoClient("localhost").getDatabase("appNameTest")
         }

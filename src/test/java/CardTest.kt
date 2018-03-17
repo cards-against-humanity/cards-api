@@ -38,6 +38,23 @@ class CardTest {
     }
 
     @Test
+    fun createMany() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val strings: MutableList<String> = ArrayList()
+        for (i in 0..99) {
+            strings.add(i.toString())
+        }
+        Card.create(strings, cardpack)
+        val cards = cardpack.getCards()
+        assert(cards.size == 100)
+        cards.forEachIndexed{ index, card ->
+            run {
+                assert(card.text == index.toString())
+            }
+        }
+    }
+
+    @Test
     fun equals() {
         assert(!cardOne!!.equals(null))
         assert(cardOne!!.equals(Card.get(ObjectId(cardOne!!.id))))

@@ -57,5 +57,18 @@ class Card {
             )
             return get(id)
         }
+
+        fun create(textList: List<String>, cardpack: Cardpack) {
+            val docs : MutableList<Document> = ArrayList()
+            textList.forEach { text ->
+                run {
+                    docs.add(Document()
+                            .append("text", text)
+                            .append("cardpackId", cardpack.id)
+                    )
+                }
+            }
+            cards.insertMany(docs)
+        }
     }
 }

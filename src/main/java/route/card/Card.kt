@@ -70,5 +70,12 @@ class Card {
             }
             cards.insertMany(docs)
         }
+
+        fun delete(id: ObjectId) {
+            val deleted = cards.deleteOne(Document("_id", id)).deletedCount == 1L
+            if (!deleted) {
+                throw Exception("Card was not found")
+            }
+        }
     }
 }

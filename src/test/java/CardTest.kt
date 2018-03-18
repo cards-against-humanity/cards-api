@@ -1,5 +1,6 @@
 import com.mongodb.MongoClient
 import org.bson.types.ObjectId
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -74,5 +75,14 @@ class CardTest {
         val cardTwo = Card.get(ObjectId(cardOne!!.id))
         assert(cardOne!!.text == newText)
         assert(cardTwo.text == newText)
+    }
+
+    @Test
+    fun delete() {
+        Card.get(ObjectId(cardOne!!.id))
+        Card.delete(ObjectId(cardOne!!.id))
+        Assertions.assertThrows(Exception::class.java) { Card.get(ObjectId(cardOne!!.id)) }
+
+        Assertions.assertThrows(Exception::class.java) { Card.delete(ObjectId(cardOne!!.id)) }
     }
 }

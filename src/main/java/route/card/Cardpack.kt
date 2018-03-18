@@ -49,6 +49,7 @@ class Cardpack {
             return cardpacks.find(Document("ownerId", user.id)).toList().map { Cardpack(it) }
         }
 
+        // TODO - Delete all cards when pack is deleted
         fun delete(id: ObjectId) {
             val deleted = cardpacks.deleteOne(Document("_id", id)).deletedCount == 1L
             if (!deleted) {

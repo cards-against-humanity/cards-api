@@ -48,6 +48,7 @@ class Card {
             return Card(cards.find(Document("_id", id)).first()!!)
         }
 
+        // TODO - Return void
         fun create(text: String, cardpack: Cardpack): Card {
             val id = ObjectId()
             cards.insertOne(Document()

@@ -1,5 +1,7 @@
 package route.card
 
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -92,12 +94,18 @@ class CardController {
         }
     }
 
-//    @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PUT])
-//    fun createCard(@RequestBody userDoc: Document, @PathVariable id: String): ResponseEntity<Card>? {
-//        // TODO - Allow single card or array
-//        return null
-//    }
-//
+    @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.PUT])
+    @ApiOperation(value = "Create cards")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Card successfully deleted"),
+            ApiResponse(code = 400, message = "Invalid request body"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun createCards(@RequestBody text: List<String>, @PathVariable id: String): ResponseEntity<Void> {
+        Card.create(text, Cardpack.get(ObjectId(id)))
+        return ResponseEntity.ok().build()
+    }
+
 //    @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
 //    fun deleteCard(@PathVariable id: String): ResponseEntity<*> {
 //        // TODO - Delete card

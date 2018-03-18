@@ -122,4 +122,20 @@ class CardControllerTest {
         deleteReq = delete("/cardpack/" + "fake_cardpack_id")
         mockMvc.perform(deleteReq).andExpect(status().isNotFound)
     }
+
+    @Test
+    fun createCard() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        var putReq: MockHttpServletRequestBuilder
+
+        putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf("card1", "card2", "card3")))
+        mockMvc.perform(putReq).andExpect(status().isOk)
+        assert(cardpack.getCards().size == 3)
+        assert(cardpack.getCards()[0].text == "card1")
+        assert(cardpack.getCards()[1].text == "card2")
+        assert(cardpack.getCards()[2].text == "card3")
+
+        putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(Document("foo", "bar")))
+        mockMvc.perform(putReq).andExpect(status().isBadRequest)
+    }
 }

@@ -106,11 +106,15 @@ class CardController {
         return ResponseEntity.ok().build()
     }
 
-//    @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
-//    fun deleteCard(@PathVariable id: String): ResponseEntity<*> {
-//        // TODO - Delete card
-//        return ResponseEntity.ok(null)
-//    }
+    @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
+    fun deleteCard(@PathVariable id: String): ResponseEntity<Void> {
+        return try {
+            Card.delete(ObjectId(id))
+            ResponseEntity.ok().build()
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
+    }
 
     @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.GET])
     @ApiOperation(value = "Get cards belonging to a cardpack")

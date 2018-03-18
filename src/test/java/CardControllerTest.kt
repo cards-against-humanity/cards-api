@@ -153,4 +153,16 @@ class CardControllerTest {
 
         mockMvc.perform(get("/cardpack/fake_id/cards")).andExpect(status().isNotFound)
     }
+
+    @Test
+    fun deleteCard() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        Card.Companion.create(arrayListOf("foo", "bar"), cardpack)
+        assert(cardpack.getCards().size == 2)
+        mockMvc.perform(delete("/card/${cardpack.getCards()[0].id}"))
+        assert(cardpack.getCards().size == 1)
+        assert(cardpack.getCards()[0].text == "bar")
+
+        mockMvc.perform(delete("/card/fake_id")).andExpect(status().isNotFound)
+    }
 }

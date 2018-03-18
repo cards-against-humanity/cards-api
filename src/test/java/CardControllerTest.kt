@@ -15,6 +15,7 @@ import route.user.User
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import route.card.Card
 import route.card.Cardpack
 import java.util.ArrayList
 
@@ -137,5 +138,19 @@ class CardControllerTest {
 
         putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(Document("foo", "bar")))
         mockMvc.perform(putReq).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun getCards() {
+        val cardpack = Cardpack.create("cardpack", userOne!!)
+        Card.Companion.create(arrayListOf("foo", "bar"), cardpack)
+
+        val result = mockMvc.perform(get("/cardpack/" + cardpack.id + "/cards"))
+        val cardTexts = toList(result) as List<String>
+        assert(cardTexts.size == 2)
+        assert(cardTexts[0] == "foo")
+        assert(cardTexts[1] == "bar")
+
+        mockMvc.perform(get("/cardpack/fake_id/cards")).andExpect(status().isNotFound)
     }
 }

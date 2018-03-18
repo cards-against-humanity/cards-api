@@ -111,12 +111,25 @@ class CardController {
 //        // TODO - Delete card
 //        return ResponseEntity.ok(null)
 //    }
-//
-//    @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.GET])
-//    fun getCards(@PathVariable id: String): ResponseEntity<List<Card>> {
-//        return ResponseEntity.ok(Cardpack.get(ObjectId(id)).getCards())
-//    }
-//
+
+    @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.GET])
+    @ApiOperation(value = "Get cards belonging to a cardpack")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cards retrieved"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun getCards(@PathVariable id: String): ResponseEntity<List<String>> {
+        val cardpack: Cardpack
+
+        try {
+            cardpack = Cardpack.get(ObjectId(id))
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+
+        return ResponseEntity.ok(cardpack.getCards().map { card -> card.text })
+    }
+
 //    @RequestMapping(value = "/cardpack/{cardpackId}/card/{cardId}", method = [RequestMethod.PATCH])
 //    fun patchCard(@RequestBody patchDoc: List<Document>, @PathVariable cardpackId: String, @PathVariable cardId: String): ResponseEntity<*>? {
 //        return null

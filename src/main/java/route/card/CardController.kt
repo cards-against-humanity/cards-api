@@ -129,14 +129,4 @@ class CardController {
 
         return ResponseEntity.ok(cardpack.getCards().map { card -> card.text })
     }
-
-//    @RequestMapping(value = "/cardpack/{cardpackId}/card/{cardId}", method = [RequestMethod.PATCH])
-//    fun patchCard(@RequestBody patchDoc: List<Document>, @PathVariable cardpackId: String, @PathVariable cardId: String): ResponseEntity<*>? {
-//        return null
-//    }
-//
-//    @RequestMapping(value = "/cardpack/{cardpackId}/card/{cardId}", method = [RequestMethod.DELETE])
-//    fun deleteCard(@PathVariable cardpackId: String, @PathVariable cardId: String): ResponseEntity<*>? {
-//        return null
-//    }
 }

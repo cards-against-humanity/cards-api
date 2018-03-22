@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.test.web.servlet.ResultActions
+import route.user.model.UserModel
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -11,6 +12,21 @@ fun toMap(result: ResultActions): Map<String, Any> {
 @Throws(Exception::class)
 fun toList(result: ResultActions): List<Any> {
     return ObjectMapper().readValue(result.andReturn().response.contentAsString, ArrayList::class.java)
+}
+
+@Throws(Exception::class)
+fun resEquals(result: ResultActions, user: UserModel): Boolean {
+    val map = toMap(result)
+    return user.id == map["id"]
+}
+
+fun userEquals(user: UserModel, obj: Any): Boolean {
+    return try {
+        obj as Map<String, String>
+        user.id == obj["id"]
+    } catch (e: Exception) {
+        false
+    }
 }
 
 @Throws(Exception::class)

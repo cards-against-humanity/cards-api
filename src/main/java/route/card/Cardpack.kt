@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bson.Document
 import org.bson.types.ObjectId
-import route.user.User
+import route.user.model.UserModel
 
 class Cardpack {
 
@@ -45,7 +45,7 @@ class Cardpack {
             return Cardpack(cardpacks.find(Document("_id", id)).first()!!)
         }
 
-        fun get(user: User): List<Cardpack> {
+        fun get(user: UserModel): List<Cardpack> {
             return cardpacks.find(Document("ownerId", user.id)).toList().map { Cardpack(it) }
         }
 
@@ -57,7 +57,7 @@ class Cardpack {
             }
         }
 
-        fun create(name: String, owner: User): Cardpack {
+        fun create(name: String, owner: UserModel): Cardpack {
             val id = ObjectId()
             cardpacks.insertOne(Document()
                     .append("_id", id)

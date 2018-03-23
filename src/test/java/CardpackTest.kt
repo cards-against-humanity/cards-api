@@ -6,11 +6,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import route.card.Card
 import route.card.Cardpack
-import route.user.User
+import route.user.memorymodel.MemoryUserCollection
 
 class CardpackTest {
-    private var userOne: User? = null
-    private var userTwo: User? = null
+    private val userCollection = MemoryUserCollection()
+
+    private var userOne = userCollection.createUser("Quinn", "4321", "google")
+    private var userTwo = userCollection.createUser("Charlie", "1234", "google")
 
     companion object {
         @BeforeAll @JvmStatic
@@ -22,14 +24,15 @@ class CardpackTest {
     @BeforeEach
     fun reset() {
         database.Instance.resetMongo()
-        userOne = User.create("4321", "google", "Quinn")
-        userTwo = User.create("1234", "google", "Charlie")
+        userCollection.clear()
+        userOne = userCollection.createUser("Quinn", "4321", "google")
+        userTwo = userCollection.createUser("Charlie", "1234", "google")
     }
 
     @Test
     fun create() {
         val cardpackName = "testCardpack"
-        val pack1 = Cardpack.create(cardpackName, userOne!!)
+        val pack1 = Cardpack.create(cardpackName, userOne)
         val pack2 = Cardpack.get(ObjectId(pack1.id))
         assert(pack1.name == cardpackName)
         assert(pack2.name == cardpackName)
@@ -37,7 +40,7 @@ class CardpackTest {
 
     @Test
     fun equals() {
-        val pack = Cardpack.create("pack", userOne!!)
+        val pack = Cardpack.create("pack", userOne)
         assert(pack.equals(Cardpack.get(ObjectId(pack.id))))
         assert(!pack.equals(null))
         assert(!pack.equals(Object()))
@@ -45,20 +48,20 @@ class CardpackTest {
 
     @Test
     fun getById() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         assert(cardpack == Cardpack.get(ObjectId(cardpack.id)))
     }
 
     @Test
     fun getByUser() {
-        assert(Cardpack.get(userOne!!).isEmpty())
-        assert(Cardpack.get(userTwo!!).isEmpty())
+        assert(Cardpack.get(userOne).isEmpty())
+        assert(Cardpack.get(userTwo).isEmpty())
 
-        Cardpack.create("pack", userOne!!)
+        Cardpack.create("pack", userOne)
 
-        assert(Cardpack.get(userOne!!).size == 1)
-        assert(Cardpack.get(userTwo!!).isEmpty())
-        assert(Cardpack.get(userOne!!)[0].ownerId == userOne!!.id)
+        assert(Cardpack.get(userOne).size == 1)
+        assert(Cardpack.get(userTwo).isEmpty())
+        assert(Cardpack.get(userOne)[0].ownerId == userOne.id)
     }
 
     @Test
@@ -67,7 +70,7 @@ class CardpackTest {
         var length: Int
         var cards: List<Card>
 
-        cardpack = Cardpack.create("cardpack", userOne!!)
+        cardpack = Cardpack.create("cardpack", userOne)
         length = 100
         for (i in 0 until length) {
             Card.create("card" + i, cardpack)
@@ -79,7 +82,7 @@ class CardpackTest {
             assert(cards[i].cardpackId == cardpack.id)
         }
 
-        cardpack = Cardpack.create("cardpack", userTwo!!)
+        cardpack = Cardpack.create("cardpack", userTwo)
         length = 50
         for (i in 0 until length) {
             Card.create("card" + i, cardpack)
@@ -94,7 +97,7 @@ class CardpackTest {
 
     @Test
     fun setName() {
-        val cardpack1 = Cardpack.create("cardpack", userOne!!)
+        val cardpack1 = Cardpack.create("cardpack", userOne)
         val name = "hello world"
         cardpack1.setName(name)
         val cardpack2 = Cardpack.get(ObjectId(cardpack1.id))
@@ -104,7 +107,7 @@ class CardpackTest {
 
     @Test
     fun delete() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         Cardpack.get(ObjectId(cardpack.id))
         Cardpack.delete(ObjectId(cardpack.id))
         assertThrows(Exception::class.java) { Cardpack.get(ObjectId(cardpack.id)) }

@@ -119,7 +119,7 @@ class UserController(private val userCollection: UserCollection, private val fri
         }
 
         return try {
-            friendCollection.addFriend(user, friend)
+            friendCollection.addFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -145,7 +145,7 @@ class UserController(private val userCollection: UserCollection, private val fri
         }
 
         return try {
-            friendCollection.removeFriend(user, friend)
+            friendCollection.removeFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -161,7 +161,7 @@ class UserController(private val userCollection: UserCollection, private val fri
     fun getFriends(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
             val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getFriends(user))
+            ResponseEntity.ok(friendCollection.getFriends(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -176,7 +176,7 @@ class UserController(private val userCollection: UserCollection, private val fri
     fun getFriendRequestsSent(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
             val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getSentRequests(user))
+            ResponseEntity.ok(friendCollection.getSentRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -191,7 +191,7 @@ class UserController(private val userCollection: UserCollection, private val fri
     fun getFriendRequestsReceived(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
             val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getReceivedRequests(user))
+            ResponseEntity.ok(friendCollection.getReceivedRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }

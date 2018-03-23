@@ -1,7 +1,5 @@
 package route.card
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -9,10 +7,11 @@ import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import route.JsonPatchItem
-import route.user.User
+import route.user.model.UserCollection
+import route.user.model.UserModel
 
 @RestController
-class CardController {
+class CardController(private val userCollection: UserCollection) {
     @RequestMapping(value = "/{userId}/cardpack", method = [RequestMethod.PUT])
     @ApiOperation(value = "Create a cardpack")
     @ApiResponses(
@@ -21,10 +20,10 @@ class CardController {
             ApiResponse(code = 404, message = "User does not exist")
     )
     fun createCardpack(@PathVariable userId: String, @RequestBody doc: JsonCardpack): ResponseEntity<Cardpack> {
-        var user: User
+        var user: UserModel
 
         try {
-            user = User.get(ObjectId(userId))
+            user = userCollection.getUser(userId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }

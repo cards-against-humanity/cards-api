@@ -6,11 +6,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import route.card.Card
 import route.card.Cardpack
-import route.user.User
+import route.user.memorymodel.MemoryUserCollection
 
 class CardTest {
-    private var userOne: User? = null
-    private var userTwo: User? = null
+    private val userCollection = MemoryUserCollection()
+    private var userOne = userCollection.createUser("Quinn", "4321", "google")
+    private var userTwo = userCollection.createUser("Charlie", "1234", "google")
     private var cardpackOne: Cardpack? = null
     private var cardOne: Card? = null
 
@@ -24,9 +25,10 @@ class CardTest {
     @BeforeEach
     fun reset() {
         database.Instance.resetMongo()
-        userOne = User.create("4321", "google", "Quinn")
-        userTwo = User.create("1234", "google", "Charlie")
-        cardpackOne = Cardpack.create("cardpackOne", userOne!!)
+        userCollection.clear()
+        userOne = userCollection.createUser("Quinn", "4321", "google")
+        userTwo = userCollection.createUser("Charlie", "1234", "google")
+        cardpackOne = Cardpack.create("cardpackOne", userOne)
         cardOne = Card.create("card", cardpackOne!!)
     }
 
@@ -40,7 +42,7 @@ class CardTest {
 
     @Test
     fun createMany() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         val strings: MutableList<String> = ArrayList()
         for (i in 0..99) {
             strings.add(i.toString())

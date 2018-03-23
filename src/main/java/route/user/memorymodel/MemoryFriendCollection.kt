@@ -60,6 +60,7 @@ class MemoryFriendCollection(private val userCollection: UserCollection) : Frien
         return friendRequests
     }
 
+    // TODO - Remove this method
     fun clear() {
         friends.clear()
     }

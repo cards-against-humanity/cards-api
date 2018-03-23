@@ -36,6 +36,7 @@ class MemoryUserCollection : UserCollection {
         return model
     }
 
+    // TODO - Remove this method
     fun clear() {
         users.clear()
     }

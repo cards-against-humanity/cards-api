@@ -11,19 +11,21 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import route.card.CardController
-import route.user.User
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import route.card.Card
 import route.card.Cardpack
+import route.user.memorymodel.MemoryUserCollection
 import java.util.ArrayList
 
 class CardControllerTest {
-    private val mockMvc = MockMvcBuilders.standaloneSetup(CardController()).build()
+    private val userCollection = MemoryUserCollection()
 
-    private var userOne: User? = null
-    private var userTwo: User? = null
+    private val mockMvc = MockMvcBuilders.standaloneSetup(CardController(userCollection)).build()
+
+    private var userOne = userCollection.createUser("Quinn", "4321", "google")
+    private var userTwo = userCollection.createUser("Charlie", "1234", "google")
 
     companion object {
 
@@ -37,8 +39,9 @@ class CardControllerTest {
     @BeforeEach
     fun reset() {
         database.Instance.resetMongo()
-        userOne = User.create("4321", "google", "Quinn")
-        userTwo = User.create("1234", "google", "Charlie")
+        userCollection.clear()
+        userOne = userCollection.createUser("Quinn", "4321", "google")
+        userTwo = userCollection.createUser("Charlie", "1234", "google")
     }
 
     @Test
@@ -47,20 +50,20 @@ class CardControllerTest {
         val result: ResultActions
         var cardpacks: List<Cardpack>
 
-        cardpacks = Cardpack.Companion.get(userOne!!)
+        cardpacks = Cardpack.Companion.get(userOne)
         assert(cardpacks.isEmpty())
 
-        putReq = put("/${userOne!!.id}/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("name", "cardpackOne").toJson())
+        putReq = put("/${userOne.id}/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("name", "cardpackOne").toJson())
         result = mockMvc.perform(putReq).andExpect(status().isOk)
 
-        cardpacks = Cardpack.Companion.get(userOne!!)
+        cardpacks = Cardpack.Companion.get(userOne)
         assert(cardpacks.size == 1)
         assert(resEquals(result, cardpacks[0]))
 
         putReq = put("/fakeuserid/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("name", "cardpackOne").toJson())
         mockMvc.perform(putReq).andExpect(status().isNotFound)
 
-        putReq = put("/${userOne!!.id}/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
+        putReq = put("/${userOne.id}/cardpack").contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
         mockMvc.perform(putReq).andExpect(status().isBadRequest)
     }
 
@@ -68,7 +71,7 @@ class CardControllerTest {
     fun getCardpack() {
         var getReq: MockHttpServletRequestBuilder
         val result: ResultActions
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
 
         getReq = get("/cardpack/${cardpack.id}")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -82,7 +85,7 @@ class CardControllerTest {
     fun patchCardpack() {
         var patchReq: MockHttpServletRequestBuilder
         var patchList: MutableList<Document>
-        val cardpack = Cardpack.create("cardpackOne", userOne!!)
+        val cardpack = Cardpack.create("cardpackOne", userOne)
 
         patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(Document("foo", "bar").toJson())
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
@@ -112,7 +115,7 @@ class CardControllerTest {
 
     @Test
     fun deleteCardpack() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         var deleteReq: MockHttpServletRequestBuilder
 
         deleteReq = delete("/cardpack/" + cardpack.id)
@@ -126,7 +129,7 @@ class CardControllerTest {
 
     @Test
     fun createCard() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         var putReq: MockHttpServletRequestBuilder
 
         putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf("card1", "card2", "card3")))
@@ -142,7 +145,7 @@ class CardControllerTest {
 
     @Test
     fun getCards() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         Card.Companion.create(arrayListOf("foo", "bar"), cardpack)
 
         val result = mockMvc.perform(get("/cardpack/" + cardpack.id + "/cards"))
@@ -156,7 +159,7 @@ class CardControllerTest {
 
     @Test
     fun deleteCard() {
-        val cardpack = Cardpack.create("cardpack", userOne!!)
+        val cardpack = Cardpack.create("cardpack", userOne)
         Card.Companion.create(arrayListOf("foo", "bar"), cardpack)
         assert(cardpack.getCards().size == 2)
         mockMvc.perform(delete("/card/${cardpack.getCards()[0].id}"))

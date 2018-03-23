@@ -33,3 +33,10 @@ fun userEquals(user: UserModel, obj: Any): Boolean {
 fun resEquals(result: ResultActions, obj: Any): Boolean {
     return obj == toMap(result)
 }
+
+fun usersAreEqual(userOne: UserModel, userTwo: UserModel): Boolean {
+    return userOne.id == userTwo.id &&
+            userOne.name == userTwo.name &&
+            userOne.oAuthId == userTwo.oAuthId &&
+            userOne.oAuthProvider == userTwo.oAuthProvider
+}

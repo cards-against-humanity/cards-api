@@ -15,13 +15,6 @@ class UserCollectionTest {
         collections = listOf(MemoryUserCollection())
     }
 
-    private fun usersAreEqual(userOne: UserModel, userTwo: UserModel): Boolean {
-        return userOne.id == userTwo.id &&
-                userOne.name == userTwo.name &&
-                userOne.oAuthId == userTwo.oAuthId &&
-                userOne.oAuthProvider == userTwo.oAuthProvider
-    }
-
     @TestFactory
     fun createUser(): List<DynamicTest> {
         return collections.map { userCollection -> DynamicTest.dynamicTest(userCollection::class.java.toString(), {
@@ -59,8 +52,6 @@ class UserCollectionTest {
         })}
     }
 
-
-
     @TestFactory
     fun getExistingUserByOAuth(): List<DynamicTest> {
         return collections.map { userCollection -> DynamicTest.dynamicTest(userCollection::class.java.toString(), {
@@ -79,8 +70,6 @@ class UserCollectionTest {
             assertEquals("User does not exist with oAuthId of $oAuthId and oAuthProvider of $oAuthProvider", e.message)
         })}
     }
-
-
 
     @TestFactory
     fun setUserName(): List<DynamicTest> {

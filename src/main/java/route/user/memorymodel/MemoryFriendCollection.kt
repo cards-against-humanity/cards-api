@@ -12,18 +12,23 @@ class MemoryFriendCollection(private val userCollection: UserCollection) : Frien
             friends[frienderId] = HashSet()
         }
 
-        if (friends[frienderId]!!.contains(friendeeId) || frienderId == friendeeId) {
-            throw Exception()
-        } else {
-            friends[frienderId]!!.add(friendeeId)
+        when {
+            frienderId == friendeeId -> throw Exception("Cannot add yourself as a friend")
+            friends[frienderId]!!.contains(friendeeId) -> throw Exception("Cannot add someone you have already added")
+            else -> friends[frienderId]!!.add(friendeeId)
         }
     }
 
     override fun removeFriend(frienderId: String, friendeeId: String) {
-        if (friends[frienderId] == null || !friends[frienderId]!!.contains(friendeeId)) {
-            throw Exception()
+        if ((friends[frienderId] == null || !friends[frienderId]!!.contains(friendeeId)) && (friends[friendeeId] == null || !friends[friendeeId]!!.contains(frienderId))) {
+            throw Exception("Users are not friends")
         }
-        friends[frienderId]!!.remove(friendeeId)
+        if (friends[frienderId] != null) {
+            friends[frienderId]!!.remove(friendeeId)
+        }
+        if (friends[friendeeId] != null) {
+            friends[friendeeId]!!.remove(frienderId)
+        }
     }
 
     override fun areFriends(userOneId: String, userTwoId: String): Boolean {

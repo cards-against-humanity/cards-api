@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
@@ -62,6 +63,70 @@ class FriendCollectionTest {
             assert(collections.friendCollection.getSentRequests(userTwo.id).isEmpty())
             assert(collections.friendCollection.getReceivedRequests(userOne.id).isEmpty())
             assert(collections.friendCollection.getReceivedRequests(userTwo.id).isEmpty())
+        })}
+    }
+
+    @TestFactory
+    fun addSelfAsFriend(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.friendCollection::class.java.toString(), {
+            val userOne = collections.userCollection.createUser("name", "1234", "google")
+            val e = assertThrows(Exception::class.java) { collections.friendCollection.addFriend(userOne.id, userOne.id) }
+            assertEquals("Cannot add yourself as a friend", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun sendDuplicateFriendRequest(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.friendCollection::class.java.toString(), {
+            val userOne = collections.userCollection.createUser("name", "1234", "google")
+            val userTwo = collections.userCollection.createUser("name", "4321", "google")
+
+            collections.friendCollection.addFriend(userOne.id, userTwo.id)
+            val e = assertThrows(Exception::class.java) { collections.friendCollection.addFriend(userOne.id, userTwo.id) }
+            assertEquals("Cannot add someone you have already added", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun addExistingFriendAgain(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.friendCollection::class.java.toString(), {
+            val userOne = collections.userCollection.createUser("name", "1234", "google")
+            val userTwo = collections.userCollection.createUser("name", "4321", "google")
+
+            collections.friendCollection.addFriend(userOne.id, userTwo.id)
+            collections.friendCollection.addFriend(userTwo.id, userOne.id)
+            val e = assertThrows(Exception::class.java) { collections.friendCollection.addFriend(userOne.id, userTwo.id) }
+            assertEquals("Cannot add someone you have already added", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun removeExistingFriend(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.friendCollection::class.java.toString(), {
+            val userOne = collections.userCollection.createUser("name", "1234", "google")
+            val userTwo = collections.userCollection.createUser("name", "4321", "google")
+
+            collections.friendCollection.addFriend(userOne.id, userTwo.id)
+            collections.friendCollection.addFriend(userTwo.id, userOne.id)
+            collections.friendCollection.removeFriend(userOne.id, userTwo.id)
+
+            assertEquals(collections.friendCollection.getFriends(userOne.id).size, 0)
+            assertEquals(collections.friendCollection.getFriends(userTwo.id).size, 0)
+            assertEquals(collections.friendCollection.getSentRequests(userOne.id).size, 0)
+            assertEquals(collections.friendCollection.getSentRequests(userTwo.id).size, 0)
+            assertEquals(collections.friendCollection.getReceivedRequests(userOne.id).size, 0)
+            assertEquals(collections.friendCollection.getReceivedRequests(userTwo.id).size, 0)
+        })}
+    }
+
+    @TestFactory
+    fun removeNonExistingFriend(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.friendCollection::class.java.toString(), {
+            val userOne = collections.userCollection.createUser("name", "1234", "google")
+            val userTwo = collections.userCollection.createUser("name", "4321", "google")
+
+            val e = assertThrows(Exception::class.java) { collections.friendCollection.removeFriend(userOne.id, userTwo.id) }
+            assertEquals("Users are not friends", e.message)
         })}
     }
 }

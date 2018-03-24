@@ -5,7 +5,7 @@ import route.card.model.CardModel
 import route.card.model.CardpackModel
 import route.user.model.UserCollection
 
-class MemoryCardCollection(val userCollection: UserCollection) : CardCollection {
+class MemoryCardCollection(private val userCollection: UserCollection) : CardCollection {
     private var cardpackId = 0
     private var cardId = 0
     private val cardpacks: MutableMap<String, MutableList<CardpackModel>> = HashMap()
@@ -39,7 +39,7 @@ class MemoryCardCollection(val userCollection: UserCollection) : CardCollection 
 
     override fun deleteCardpack(cardpackId: String) {
         if (cardpacks[cardpackId] == null) {
-            throw Exception("Cardpack does nit exist with id: $cardpackId")
+            throw Exception("Cardpack does not exist with id: $cardpackId")
         }
         cardpacks.remove(cardpackId)
         cards.remove(cardpackId)
@@ -55,10 +55,11 @@ class MemoryCardCollection(val userCollection: UserCollection) : CardCollection 
                 }
             }
         }
-        throw Exception("Card does not exist with id $cardId")
+        throw Exception("Card does not exist with id: $cardId")
     }
 
     override fun deleteCards(ids: List<String>) {
+        ids.forEach { id -> this.getCardpack(this.getCard(id).cardpackId) }
         ids.forEach { id -> this.deleteCard(id) }
     }
 
@@ -71,7 +72,7 @@ class MemoryCardCollection(val userCollection: UserCollection) : CardCollection 
                 }
             }
         }
-        throw Exception("Card does not exist with id $cardId")
+        throw Exception("Cardpack does not exist with id: $cardpackId")
     }
 
     override fun getCardpacks(userId: String): List<CardpackModel> {
@@ -88,7 +89,7 @@ class MemoryCardCollection(val userCollection: UserCollection) : CardCollection 
                 }
             }
         }
-        throw Exception("Card does not exist with id $cardId")
+        throw Exception("Card does not exist with id: $cardId")
     }
 
     private class MemoryCardpackModel(override val id: String, override var name: String, override val ownerId: String, private val cardsByCardpack: Map<String, MutableList<CardModel>>) : CardpackModel {

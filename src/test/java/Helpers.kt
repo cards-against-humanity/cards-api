@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.test.web.servlet.ResultActions
+import route.card.model.CardModel
 import route.card.model.CardpackModel
 import route.user.model.UserModel
 import java.util.ArrayList
@@ -38,6 +39,10 @@ fun userEquals(user: UserModel, obj: Any): Boolean {
 
 fun cardpackEquals(cardpackOne: CardpackModel, cardpackTwo: CardpackModel): Boolean {
     return cardpackOne.id == cardpackTwo.id && cardpackOne.name == cardpackTwo.name && cardpackOne.ownerId == cardpackTwo.ownerId
+}
+
+fun cardEquals(cardOne: CardModel, cardTwo: CardModel): Boolean {
+    return cardOne.id == cardTwo.id && cardOne.text == cardTwo.text && cardOne.cardpackId == cardTwo.cardpackId
 }
 
 @Throws(Exception::class)

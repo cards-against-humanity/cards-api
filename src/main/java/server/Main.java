@@ -14,7 +14,6 @@ import route.AuthInterceptor;
 import route.card.CardController;
 import route.search.SearchController;
 import route.user.UserController;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
@@ -23,9 +22,6 @@ import java.util.*;
 public class Main extends WebMvcConfigurerAdapter {
     public static void main(String[] args) throws UnknownHostException {
         Map<String, Object> argMap = parseArgs(args);
-
-        database.Instance.INSTANCE.setMongo(new MongoClient(new ServerAddress(InetAddress.getByName((String) argMap.get("MONGO_HOST")), (int) argMap.get("MONGO_PORT"))).getDatabase((String) argMap.get("MONGO_DATABASE")));
-        elasticsearch.Instance.INSTANCE.set(InetAddress.getByName((String) argMap.get("ELASTICSEARCH_HOST")), (int) argMap.get("ELASTICSEARCH_PORT"));
         SpringApplication.run(Main.class, args);
     }
 

@@ -1,7 +1,5 @@
 package server;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
 import config.SwaggerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

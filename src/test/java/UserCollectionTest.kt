@@ -3,6 +3,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import database.memorymodel.MemoryUserCollection
+import database.mongomodel.MongoUserCollection
 import route.user.model.UserCollection
 import kotlin.test.assertEquals
 
@@ -11,7 +12,8 @@ class UserCollectionTest {
 
     @BeforeEach
     fun reset() {
-        collections = listOf(MemoryUserCollection())
+        resetTestMongo()
+        collections = listOf(MemoryUserCollection(), MongoUserCollection(getTestMongoCollection("users")))
     }
 
     @TestFactory

@@ -1,8 +1,13 @@
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.mongodb.MongoClient
+import com.mongodb.ServerAddress
+import com.mongodb.client.MongoCollection
+import org.bson.Document
 import org.springframework.test.web.servlet.ResultActions
 import route.card.model.CardModel
 import route.card.model.CardpackModel
 import route.user.model.UserModel
+import java.net.InetAddress
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -55,4 +60,15 @@ fun usersAreEqual(userOne: UserModel, userTwo: UserModel): Boolean {
             userOne.name == userTwo.name &&
             userOne.oAuthId == userTwo.oAuthId &&
             userOne.oAuthProvider == userTwo.oAuthProvider
+}
+
+
+val mongoClient = MongoClient(ServerAddress(InetAddress.getLocalHost())).getDatabase("appTest")
+
+fun getTestMongoCollection(name: String): MongoCollection<Document> {
+    return mongoClient.getCollection(name)
+}
+
+fun resetTestMongo() {
+    mongoClient.drop()
 }

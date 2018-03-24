@@ -12,23 +12,27 @@ import route.card.CardController
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import route.card.memorymodel.MemoryCardCollection
+import route.card.model.CardCollection
 import route.card.model.CardpackModel
 import route.user.memorymodel.MemoryUserCollection
+import route.user.model.UserCollection
 import java.util.ArrayList
 import kotlin.test.assertEquals
 
 class CardControllerTest {
-    private val userCollection = MemoryUserCollection()
-    private val cardCollection = MemoryCardCollection(userCollection)
+    private var userCollection: UserCollection = MemoryUserCollection()
+    private var cardCollection: CardCollection = MemoryCardCollection(userCollection)
 
-    private val mockMvc = MockMvcBuilders.standaloneSetup(CardController(userCollection, cardCollection)).build()
+    private var mockMvc = MockMvcBuilders.standaloneSetup(CardController(userCollection, cardCollection)).build()
 
     private var userOne = userCollection.createUser("Quinn", "4321", "google")
     private var userTwo = userCollection.createUser("Charlie", "1234", "google")
 
     @BeforeEach
     fun reset() {
-        userCollection.clear()
+        userCollection = MemoryUserCollection()
+        cardCollection = MemoryCardCollection(userCollection)
+        mockMvc = MockMvcBuilders.standaloneSetup(CardController(userCollection, cardCollection)).build()
         userOne = userCollection.createUser("Quinn", "4321", "google")
         userTwo = userCollection.createUser("Charlie", "1234", "google")
     }

@@ -14,21 +14,24 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import route.user.memorymodel.MemoryFriendCollection
 import route.user.memorymodel.MemoryUserCollection
+import route.user.model.FriendCollection
+import route.user.model.UserCollection
 
 class UserControllerTest {
 
-    private val userCollection = MemoryUserCollection()
-    private val friendCollection = MemoryFriendCollection(userCollection)
+    private var userCollection: UserCollection = MemoryUserCollection()
+    private var friendCollection: FriendCollection = MemoryFriendCollection(userCollection)
 
-    private val mockMvc = MockMvcBuilders.standaloneSetup(UserController(userCollection, friendCollection)).build()
+    private var mockMvc = MockMvcBuilders.standaloneSetup(UserController(userCollection, friendCollection)).build()
 
     private var userOne = userCollection.createUser("Quinn", "4321", "google")
     private var userTwo = userCollection.createUser("Charlie", "1234", "google")
 
     @BeforeEach
     fun reset() {
-        userCollection.clear()
-        friendCollection.clear()
+        userCollection = MemoryUserCollection()
+        friendCollection = MemoryFriendCollection(userCollection)
+        mockMvc = MockMvcBuilders.standaloneSetup(UserController(userCollection, friendCollection)).build()
         userOne = userCollection.createUser("Quinn", "4321", "google")
         userTwo = userCollection.createUser("Charlie", "1234", "google")
     }

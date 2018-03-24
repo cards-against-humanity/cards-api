@@ -36,11 +36,6 @@ class MemoryUserCollection : UserCollection {
         return model
     }
 
-    // TODO - Remove this method
-    fun clear() {
-        users.clear()
-    }
-
     private class MemoryUserModel(override val id: String, override var name: String, override val oAuthId: String, override val oAuthProvider: String) : UserModel {
         override fun setName(name: String): UserModel {
             this.name = name

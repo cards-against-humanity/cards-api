@@ -1,4 +1,4 @@
-package route.user.memorymodel
+package database.memorymodel
 
 import route.user.model.UserCollection
 import route.user.model.UserModel

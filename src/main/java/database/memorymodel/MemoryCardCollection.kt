@@ -1,4 +1,4 @@
-package route.card.memorymodel
+package database.memorymodel
 
 import route.card.model.CardCollection
 import route.card.model.CardModel

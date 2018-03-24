@@ -12,8 +12,8 @@ import java.util.ArrayList
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import route.user.memorymodel.MemoryFriendCollection
-import route.user.memorymodel.MemoryUserCollection
+import database.memorymodel.MemoryFriendCollection
+import database.memorymodel.MemoryUserCollection
 import route.user.model.FriendCollection
 import route.user.model.UserCollection
 

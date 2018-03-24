@@ -11,10 +11,10 @@ import route.card.CardController
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import route.card.memorymodel.MemoryCardCollection
+import database.memorymodel.MemoryCardCollection
 import route.card.model.CardCollection
 import route.card.model.CardpackModel
-import route.user.memorymodel.MemoryUserCollection
+import database.memorymodel.MemoryUserCollection
 import route.user.model.UserCollection
 import java.util.ArrayList
 import kotlin.test.assertEquals

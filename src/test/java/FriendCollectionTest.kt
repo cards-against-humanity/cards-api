@@ -2,8 +2,8 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import route.user.memorymodel.MemoryFriendCollection
-import route.user.memorymodel.MemoryUserCollection
+import database.memorymodel.MemoryFriendCollection
+import database.memorymodel.MemoryUserCollection
 import route.user.model.FriendCollection
 import route.user.model.UserCollection
 import kotlin.test.assertEquals

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import route.user.memorymodel.MemoryUserCollection
 import route.user.model.UserCollection
-import route.user.model.UserModel
 import kotlin.test.assertEquals
 
 class UserCollectionTest {

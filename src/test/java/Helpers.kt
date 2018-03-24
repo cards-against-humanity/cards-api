@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.test.web.servlet.ResultActions
+import route.card.model.CardpackModel
 import route.user.model.UserModel
 import java.util.ArrayList
 import java.util.HashMap
@@ -20,6 +21,12 @@ fun resEquals(result: ResultActions, user: UserModel): Boolean {
     return user.id == map["id"]
 }
 
+@Throws(Exception::class)
+fun resEquals(result: ResultActions, cardpack: CardpackModel): Boolean {
+    val map = toMap(result)
+    return cardpack.id == map["id"]
+}
+
 fun userEquals(user: UserModel, obj: Any): Boolean {
     return try {
         obj as Map<String, String>
@@ -27,6 +34,10 @@ fun userEquals(user: UserModel, obj: Any): Boolean {
     } catch (e: Exception) {
         false
     }
+}
+
+fun cardpackEquals(cardpackOne: CardpackModel, cardpackTwo: CardpackModel): Boolean {
+    return cardpackOne.id == cardpackTwo.id && cardpackOne.name == cardpackTwo.name && cardpackOne.ownerId == cardpackTwo.ownerId
 }
 
 @Throws(Exception::class)

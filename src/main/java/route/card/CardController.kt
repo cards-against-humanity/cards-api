@@ -7,11 +7,13 @@ import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import route.JsonPatchItem
+import route.card.model.CardCollection
+import route.card.model.CardpackModel
 import route.user.model.UserCollection
 import route.user.model.UserModel
 
 @RestController
-class CardController(private val userCollection: UserCollection) {
+class CardController(private val userCollection: UserCollection, private val cardCollection: CardCollection) {
     @RequestMapping(value = "/{userId}/cardpack", method = [RequestMethod.PUT])
     @ApiOperation(value = "Create a cardpack")
     @ApiResponses(
@@ -19,7 +21,7 @@ class CardController(private val userCollection: UserCollection) {
             ApiResponse(code = 400, message = "Invalid request body"),
             ApiResponse(code = 404, message = "User does not exist")
     )
-    fun createCardpack(@PathVariable userId: String, @RequestBody doc: JsonCardpack): ResponseEntity<Cardpack> {
+    fun createCardpack(@PathVariable userId: String, @RequestBody doc: JsonCardpack): ResponseEntity<CardpackModel> {
         var user: UserModel
 
         try {
@@ -29,7 +31,7 @@ class CardController(private val userCollection: UserCollection) {
         }
 
         return try {
-            val cardpack = Cardpack.create(doc.name!!, user)
+            val cardpack = cardCollection.createCardpack(doc.name!!, user.id)
             ResponseEntity.ok(cardpack)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -42,9 +44,9 @@ class CardController(private val userCollection: UserCollection) {
             ApiResponse(code = 200, message = "Cardpack retrieved"),
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
-    fun getCardpack(@PathVariable id: String): ResponseEntity<Cardpack> {
+    fun getCardpack(@PathVariable id: String): ResponseEntity<CardpackModel> {
         return try {
-            val cardpack = Cardpack.get(ObjectId(id))
+            val cardpack = cardCollection.getCardpack(id)
             ResponseEntity.ok(cardpack)
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -59,10 +61,10 @@ class CardController(private val userCollection: UserCollection) {
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
     fun patchCardpack(@RequestBody patchDoc: List<JsonPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
-        val cardpack: Cardpack
+        val cardpack: CardpackModel
 
         try {
-            cardpack = Cardpack.get(ObjectId(id))
+            cardpack = cardCollection.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
@@ -86,7 +88,7 @@ class CardController(private val userCollection: UserCollection) {
     )
     fun deleteCardpack(@PathVariable id: String): ResponseEntity<Void> {
         return try {
-            Cardpack.delete(ObjectId(id))
+            cardCollection.deleteCardpack(id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -101,14 +103,14 @@ class CardController(private val userCollection: UserCollection) {
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
     fun createCards(@RequestBody text: List<String>, @PathVariable id: String): ResponseEntity<Void> {
-        Card.create(text, Cardpack.get(ObjectId(id)))
+        cardCollection.createCards(text, id)
         return ResponseEntity.ok().build()
     }
 
     @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
     fun deleteCard(@PathVariable id: String): ResponseEntity<Void> {
         return try {
-            Card.delete(ObjectId(id))
+            cardCollection.deleteCard(id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -122,10 +124,10 @@ class CardController(private val userCollection: UserCollection) {
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
     fun getCards(@PathVariable id: String): ResponseEntity<List<String>> {
-        val cardpack: Cardpack
+        val cardpack: CardpackModel
 
         try {
-            cardpack = Cardpack.get(ObjectId(id))
+            cardpack = cardCollection.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }

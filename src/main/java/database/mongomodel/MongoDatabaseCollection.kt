@@ -7,7 +7,7 @@ import route.card.model.CardCollection
 import route.user.model.FriendCollection
 import route.user.model.UserCollection
 
-class MemoryDatabaseCollection(
+class MongoDatabaseCollection(
         private val mongoDatabase: MongoDatabase,
         private val mongoUserCollection: MongoUserCollection = MongoUserCollection(mongoDatabase.getCollection("user")),
         private val mongoFriendCollection: MongoFriendCollection = MongoFriendCollection(mongoDatabase.getCollection("friend"), mongoUserCollection),

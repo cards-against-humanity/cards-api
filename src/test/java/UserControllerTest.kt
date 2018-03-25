@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper
+import database.DatabaseCollection
 import org.bson.Document
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,28 +13,23 @@ import java.util.ArrayList
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import database.memorymodel.MemoryFriendCollection
-import database.memorymodel.MemoryUserCollection
-import route.user.model.FriendCollection
-import route.user.model.UserCollection
+import database.memorymodel.*
 
 class UserControllerTest {
 
-    private var userCollection: UserCollection = MemoryUserCollection()
-    private var friendCollection: FriendCollection = MemoryFriendCollection(userCollection)
+    private var database: DatabaseCollection = MemoryDatabaseCollection()
 
-    private var mockMvc = MockMvcBuilders.standaloneSetup(UserController(userCollection, friendCollection)).build()
+    private var mockMvc = MockMvcBuilders.standaloneSetup(UserController(database)).build()
 
-    private var userOne = userCollection.createUser("Quinn", "4321", "google")
-    private var userTwo = userCollection.createUser("Charlie", "1234", "google")
+    private var userOne = database.createUser("Quinn", "4321", "google")
+    private var userTwo = database.createUser("Charlie", "1234", "google")
 
     @BeforeEach
     fun reset() {
-        userCollection = MemoryUserCollection()
-        friendCollection = MemoryFriendCollection(userCollection)
-        mockMvc = MockMvcBuilders.standaloneSetup(UserController(userCollection, friendCollection)).build()
-        userOne = userCollection.createUser("Quinn", "4321", "google")
-        userTwo = userCollection.createUser("Charlie", "1234", "google")
+        database = MemoryDatabaseCollection()
+        mockMvc = MockMvcBuilders.standaloneSetup(UserController(database)).build()
+        userOne = database.createUser("Quinn", "4321", "google")
+        userTwo = database.createUser("Charlie", "1234", "google")
     }
 
     @Test
@@ -95,7 +91,7 @@ class UserControllerTest {
 
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson())
         result = mockMvc.perform(putReq).andExpect(status().isOk)
-        val createdUser = userCollection.getUser(toMap(result)["id"] as String)
+        val createdUser = database.getUser(toMap(result)["id"] as String)
         resEquals(result, createdUser)
 
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson())
@@ -125,7 +121,7 @@ class UserControllerTest {
     fun removeFriend() {
         var deleteReq: MockHttpServletRequestBuilder
 
-        friendCollection.addFriend(userOne.id, userTwo.id)
+        database.addFriend(userOne.id, userTwo.id)
         deleteReq = delete("/user/" + userOne.id + "/friends/" + userTwo.id)
         mockMvc.perform(deleteReq).andExpect(status().isOk)
 
@@ -150,7 +146,7 @@ class UserControllerTest {
         result = mockMvc.perform(getReq).andExpect(status().isOk)
         assert(toList(result).isEmpty())
 
-        friendCollection.addFriend(userOne.id, userTwo.id)
+        database.addFriend(userOne.id, userTwo.id)
 
         getReq = get("/user/" + userOne.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -160,7 +156,7 @@ class UserControllerTest {
         result = mockMvc.perform(getReq).andExpect(status().isOk)
         assert(toList(result).isEmpty())
 
-        friendCollection.addFriend(userTwo.id, userOne.id)
+        database.addFriend(userTwo.id, userOne.id)
 
         getReq = get("/user/" + userOne.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -172,7 +168,7 @@ class UserControllerTest {
         assert(toList(result).size == 1)
         assert(userEquals(userOne, toList(result)[0]))
 
-        friendCollection.removeFriend(userOne.id, userTwo.id)
+        database.removeFriend(userOne.id, userTwo.id)
 
         getReq = get("/user/" + userOne.id + "/friends")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -207,7 +203,7 @@ class UserControllerTest {
         result = mockMvc.perform(getReq).andExpect(status().isOk)
         assert(toList(result).isEmpty())
 
-        friendCollection.addFriend(userOne.id, userTwo.id)
+        database.addFriend(userOne.id, userTwo.id)
 
         getReq = get("/user/" + userOne.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -225,7 +221,7 @@ class UserControllerTest {
         assert(toList(result).size == 1)
         assert(userEquals(userOne, toList(result)[0]))
 
-        friendCollection.addFriend(userTwo.id, userOne.id)
+        database.addFriend(userTwo.id, userOne.id)
 
         getReq = get("/user/" + userOne.id + "/friends/requests/sent")
         result = mockMvc.perform(getReq).andExpect(status().isOk)
@@ -265,18 +261,18 @@ class UserControllerTest {
         patchList.add(Document("foo", "bar"))
         patchReq = patch("/user/" + userOne.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
-        assert(userCollection.getUser(userOne.id).name == userOne.name)
+        assert(database.getUser(userOne.id).name == userOne.name)
 
         patchList = ArrayList()
         patchList.add(Document("op", "replace").append("path", "/fakepath"))
         patchReq = patch("/user/" + userOne.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
-        assert(userCollection.getUser(userOne.id).name == userOne.name)
+        assert(database.getUser(userOne.id).name == userOne.name)
 
         patchList = ArrayList()
         patchList.add(Document("op", "replace").append("path", "/name").append("value", "newName"))
         patchReq = patch("/user/" + userOne.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isOk)
-        assert(userCollection.getUser(userOne.id).name == "newName")
+        assert(database.getUser(userOne.id).name == "newName")
     }
 }

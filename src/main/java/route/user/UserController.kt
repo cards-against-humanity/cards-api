@@ -5,13 +5,12 @@ import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import database.DatabaseCollection
 import route.JsonPatchItem
-import route.user.model.FriendCollection
-import route.user.model.UserCollection
 import route.user.model.UserModel
 
 @RestController
-class UserController(private val userCollection: UserCollection, private val friendCollection: FriendCollection) {
+class UserController(private val database: DatabaseCollection) {
 
     @RequestMapping(value = "/user/{id}", method = [RequestMethod.GET])
     @ApiOperation(value = "Get a user")
@@ -21,7 +20,7 @@ class UserController(private val userCollection: UserCollection, private val fri
     )
     fun getUser(@PathVariable id: String): ResponseEntity<UserModel> {
         return try {
-            ResponseEntity.ok(userCollection.getUser(id))
+            ResponseEntity.ok(database.getUser(id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -49,9 +48,9 @@ class UserController(private val userCollection: UserCollection, private val fri
 
         return try {
             if (oAuthId != null && oAuthProvider != null) {
-                ResponseEntity.ok(userCollection.getUser(oAuthId, oAuthProvider))
+                ResponseEntity.ok(database.getUser(oAuthId, oAuthProvider))
             } else {
-                ResponseEntity.ok(userCollection.getUser(id!!))
+                ResponseEntity.ok(database.getUser(id!!))
             }
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -67,7 +66,7 @@ class UserController(private val userCollection: UserCollection, private val fri
     )
     fun createUser(@RequestBody user: JsonUser): ResponseEntity<UserModel> {
         return try {
-            ResponseEntity.ok(userCollection.createUser(user.name!!, user.oAuthId!!, user.oAuthProvider!!))
+            ResponseEntity.ok(database.createUser(user.name!!, user.oAuthId!!, user.oAuthProvider!!))
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(null)
         }
@@ -84,7 +83,7 @@ class UserController(private val userCollection: UserCollection, private val fri
         val user: UserModel
 
         try {
-            user = userCollection.getUser(id)
+            user = database.getUser(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
@@ -112,14 +111,14 @@ class UserController(private val userCollection: UserCollection, private val fri
         val user: UserModel
         val friend: UserModel
         try {
-            user = userCollection.getUser(userId)
-            friend = userCollection.getUser(friendId)
+            user = database.getUser(userId)
+            friend = database.getUser(friendId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
 
         return try {
-            friendCollection.addFriend(user.id, friend.id)
+            database.addFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -138,14 +137,14 @@ class UserController(private val userCollection: UserCollection, private val fri
         val friend: UserModel
 
         try {
-            user = userCollection.getUser(userId)
-            friend = userCollection.getUser(friendId)
+            user = database.getUser(userId)
+            friend = database.getUser(friendId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
 
         return try {
-            friendCollection.removeFriend(user.id, friend.id)
+            database.removeFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -160,8 +159,8 @@ class UserController(private val userCollection: UserCollection, private val fri
     )
     fun getFriends(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getFriends(user.id))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getFriends(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -175,8 +174,8 @@ class UserController(private val userCollection: UserCollection, private val fri
     )
     fun getFriendRequestsSent(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getSentRequests(user.id))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getSentRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -190,8 +189,8 @@ class UserController(private val userCollection: UserCollection, private val fri
     )
     fun getFriendRequestsReceived(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = userCollection.getUser(id)
-            ResponseEntity.ok(friendCollection.getReceivedRequests(user.id))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getReceivedRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }

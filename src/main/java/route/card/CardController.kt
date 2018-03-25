@@ -1,5 +1,6 @@
 package route.card
 
+import database.DatabaseCollection
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -13,7 +14,7 @@ import route.user.model.UserCollection
 import route.user.model.UserModel
 
 @RestController
-class CardController(private val userCollection: UserCollection, private val cardCollection: CardCollection) {
+class CardController(private val database: DatabaseCollection) {
     @RequestMapping(value = "/{userId}/cardpack", method = [RequestMethod.PUT])
     @ApiOperation(value = "Create a cardpack")
     @ApiResponses(
@@ -25,13 +26,13 @@ class CardController(private val userCollection: UserCollection, private val car
         var user: UserModel
 
         try {
-            user = userCollection.getUser(userId)
+            user = database.getUser(userId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
 
         return try {
-            val cardpack = cardCollection.createCardpack(doc.name!!, user.id)
+            val cardpack = database.createCardpack(doc.name!!, user.id)
             ResponseEntity.ok(cardpack)
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -46,7 +47,7 @@ class CardController(private val userCollection: UserCollection, private val car
     )
     fun getCardpack(@PathVariable id: String): ResponseEntity<CardpackModel> {
         return try {
-            val cardpack = cardCollection.getCardpack(id)
+            val cardpack = database.getCardpack(id)
             ResponseEntity.ok(cardpack)
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -64,7 +65,7 @@ class CardController(private val userCollection: UserCollection, private val car
         val cardpack: CardpackModel
 
         try {
-            cardpack = cardCollection.getCardpack(id)
+            cardpack = database.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
@@ -88,7 +89,7 @@ class CardController(private val userCollection: UserCollection, private val car
     )
     fun deleteCardpack(@PathVariable id: String): ResponseEntity<Void> {
         return try {
-            cardCollection.deleteCardpack(id)
+            database.deleteCardpack(id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -103,14 +104,14 @@ class CardController(private val userCollection: UserCollection, private val car
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
     fun createCards(@RequestBody text: List<String>, @PathVariable id: String): ResponseEntity<Void> {
-        cardCollection.createCards(text, id)
+        database.createCards(text, id)
         return ResponseEntity.ok().build()
     }
 
     @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
     fun deleteCard(@PathVariable id: String): ResponseEntity<Void> {
         return try {
-            cardCollection.deleteCard(id)
+            database.deleteCard(id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -127,7 +128,7 @@ class CardController(private val userCollection: UserCollection, private val car
         val cardpack: CardpackModel
 
         try {
-            cardpack = cardCollection.getCardpack(id)
+            cardpack = database.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }

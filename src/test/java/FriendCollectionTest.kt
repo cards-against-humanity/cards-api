@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import database.memorymodel.MemoryFriendCollection
 import database.memorymodel.MemoryUserCollection
+import database.mongomodel.MongoFriendCollection
+import database.mongomodel.MongoUserCollection
 import route.user.model.FriendCollection
 import route.user.model.UserCollection
 import kotlin.test.assertEquals
@@ -18,9 +20,14 @@ class FriendCollectionTest {
 
     @BeforeEach
     fun reset() {
+        resetTestMongo()
+
         val memUserCollection = MemoryUserCollection()
         val memFriendCollection = MemoryFriendCollection(memUserCollection)
-        collections = listOf(CollectionGroup(memUserCollection, memFriendCollection))
+
+        val mongoUserCollection = MongoUserCollection(getTestMongoCollection("users"))
+        val mongoFriendCollection = MongoFriendCollection(getTestMongoCollection("friends"), mongoUserCollection)
+        collections = listOf(CollectionGroup(memUserCollection, memFriendCollection), CollectionGroup(mongoUserCollection, mongoFriendCollection))
     }
 
     @TestFactory

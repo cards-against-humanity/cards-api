@@ -5,21 +5,29 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import database.memorymodel.MemoryCardCollection
 import database.memorymodel.MemoryUserCollection
+import database.mongomodel.MongoCardCollection
+import database.mongomodel.MongoUserCollection
+import route.card.model.CardCollection
 import route.user.model.UserCollection
 
 class CardCollectionTest {
     private data class CollectionGroup(
             val userCollection: UserCollection,
-            val cardCollection: MemoryCardCollection
+            val cardCollection: CardCollection
     )
 
     private var collections = listOf<CollectionGroup>()
 
     @BeforeEach
     fun reset() {
+        resetTestMongo()
+
         val memUserCollection = MemoryUserCollection()
         val memCardCollection = MemoryCardCollection(memUserCollection)
-        collections = listOf(CollectionGroup(memUserCollection, memCardCollection))
+
+        val mongoUserCollection = MongoUserCollection(getTestMongoCollection("users"))
+        val mongoCardCollection = MongoCardCollection(getTestMongoCollection("cardpacks"), getTestMongoCollection("cards"), mongoUserCollection)
+        collections = listOf(CollectionGroup(memUserCollection, memCardCollection), CollectionGroup(mongoUserCollection, mongoCardCollection))
     }
 
     @TestFactory
@@ -148,7 +156,7 @@ class CardCollectionTest {
     fun deleteNonExistingCards(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCards(listOf("fake", "id")) }
-            assertEquals("Card does not exist with id: fake", e.message)
+            assertEquals("One or more card ids is invalid", e.message)
         })}
     }
 
@@ -159,7 +167,7 @@ class CardCollectionTest {
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
             val cards = collections.cardCollection.createCards(listOf("card_0", "card_1", "card_2"), cardpack.id)
             val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCards(listOf(cards[0].id, "fake_id", cards[1].id, cards[2].id)) }
-            assertEquals("Card does not exist with id: fake_id", e.message)
+            assertEquals("One or more card ids is invalid", e.message)
             assertEquals(3, cardpack.getCards().size)
         })}
     }

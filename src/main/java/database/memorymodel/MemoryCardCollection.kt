@@ -59,8 +59,12 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
     }
 
     override fun deleteCards(ids: List<String>) {
-        ids.forEach { id -> this.getCardpack(this.getCard(id).cardpackId) }
-        ids.forEach { id -> this.deleteCard(id) }
+        try {
+            ids.forEach { id -> this.getCardpack(this.getCard(id).cardpackId) }
+            ids.forEach { id -> this.deleteCard(id) }
+        } catch (e: Exception) {
+            throw Exception("One or more card ids is invalid")
+        }
     }
 
     override fun getCardpack(cardpackId: String): CardpackModel {

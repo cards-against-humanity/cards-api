@@ -63,7 +63,7 @@ fun usersAreEqual(userOne: UserModel, userTwo: UserModel): Boolean {
 }
 
 
-val mongoClient = MongoClient(ServerAddress(InetAddress.getLocalHost())).getDatabase("appTest")
+val mongoClient = MongoClient(ServerAddress(InetAddress.getLoopbackAddress())).getDatabase("appTest")
 
 fun getTestMongoCollection(name: String): MongoCollection<Document> {
     return mongoClient.getCollection(name)

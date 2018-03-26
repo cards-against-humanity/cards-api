@@ -1,12 +1,11 @@
 package route.user.model
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@JsonSerialize(using = UserModelSerializer::class)
 interface UserModel {
-    val id: String
-    val name: String
-    val oAuthId: String
-    val oAuthProvider: String
+    val id: String            @JsonProperty(value = "id") get
+    val name: String          @JsonProperty(value = "name") get
+    val oAuthId: String       @JsonProperty(value = "oAuthId") get
+    val oAuthProvider: String @JsonProperty(value = "oAuthProvider") get
     fun setName(name: String): UserModel
 }

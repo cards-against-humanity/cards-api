@@ -3,22 +3,24 @@ package route.user
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import database.DatabaseCollection
 import route.JsonPatchItem
+import route.user.model.UserModel
 
 @RestController
-class UserController {
+class UserController(private val database: DatabaseCollection) {
+
     @RequestMapping(value = "/user/{id}", method = [RequestMethod.GET])
     @ApiOperation(value = "Get a user")
     @ApiResponses(
             ApiResponse(code = 200, message = "User retrieved"),
             ApiResponse(code = 404, message = "User does not exist")
     )
-    fun getUser(@PathVariable id: String): ResponseEntity<User> {
+    fun getUser(@PathVariable id: String): ResponseEntity<UserModel> {
         return try {
-            ResponseEntity.ok(User.get(ObjectId(id)))
+            ResponseEntity.ok(database.getUser(id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -35,7 +37,7 @@ class UserController {
             @RequestParam(value = "id", required = false) id: String?,
             @RequestParam(value = "oAuthProvider", required = false) oAuthProvider: String?,
             @RequestParam(value = "oAuthId", required = false) oAuthId: String?
-    ): ResponseEntity<User> {
+    ): ResponseEntity<UserModel> {
         if ((oAuthProvider == null) xor (oAuthId == null)) {
             return ResponseEntity.badRequest().build()
         } else if (id == null && oAuthProvider == null) {
@@ -46,9 +48,9 @@ class UserController {
 
         return try {
             if (oAuthId != null && oAuthProvider != null) {
-                ResponseEntity.ok(User.get(oAuthId, oAuthProvider))
+                ResponseEntity.ok(database.getUser(oAuthId, oAuthProvider))
             } else {
-                ResponseEntity.ok(User.get(ObjectId(id!!)))
+                ResponseEntity.ok(database.getUser(id!!))
             }
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
@@ -62,10 +64,9 @@ class UserController {
             ApiResponse(code = 200, message = "User created"),
             ApiResponse(code = 400, message = "Invalid request body")
     )
-    fun createUser(@RequestBody user: JsonUser): ResponseEntity<User> {
+    fun createUser(@RequestBody user: JsonUser): ResponseEntity<UserModel> {
         return try {
-            val u = User.create(user.oAuthId!!, user.oAuthProvider!!, user.name!!)
-            ResponseEntity.ok(u)
+            ResponseEntity.ok(database.createUser(user.name!!, user.oAuthId!!, user.oAuthProvider!!))
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(null)
         }
@@ -79,10 +80,10 @@ class UserController {
             ApiResponse(code = 404, message = "User does not exist")
     )
     fun patchUser(@RequestBody patchDoc: List<JsonPatchItem>, @PathVariable id: String): ResponseEntity<Void> {
-        val user: User
+        val user: UserModel
 
         try {
-            user = User.get(ObjectId(id))
+            user = database.getUser(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
@@ -107,17 +108,17 @@ class UserController {
             ApiResponse(code = 404, message = "One or both of the users do not exist")
     )
     fun addFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<Void> {
-        var user: User?
-        var friend: User?
+        val user: UserModel
+        val friend: UserModel
         try {
-            user = User.get(ObjectId(userId))
-            friend = User.get(ObjectId(friendId))
+            user = database.getUser(userId)
+            friend = database.getUser(friendId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
 
         return try {
-            Friend.addFriend(user, friend)
+            database.addFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -132,17 +133,18 @@ class UserController {
             ApiResponse(code = 404, message = "One or both of the users do not exist")
     )
     fun removeFriend(@PathVariable userId: String, @PathVariable friendId: String): ResponseEntity<Void> {
-        var user: User?
-        var friend: User?
+        val user: UserModel
+        val friend: UserModel
+
         try {
-            user = User.get(ObjectId(userId))
-            friend = User.get(ObjectId(friendId))
+            user = database.getUser(userId)
+            friend = database.getUser(friendId)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
 
         return try {
-            Friend.removeFriend(user, friend)
+            database.removeFriend(user.id, friend.id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.badRequest().build()
@@ -155,10 +157,10 @@ class UserController {
             ApiResponse(code = 200, message = "Friends retrieved"),
             ApiResponse(code = 404, message = "User does not exist")
     )
-    fun getFriends(@PathVariable id: String): ResponseEntity<List<User>> {
+    fun getFriends(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = User.get(ObjectId(id))
-            ResponseEntity.ok(Friend.getFriends(user))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getFriends(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -170,10 +172,10 @@ class UserController {
             ApiResponse(code = 200, message = "Friend requests retrieved"),
             ApiResponse(code = 404, message = "User does not exist")
     )
-    fun getFriendRequestsSent(@PathVariable id: String): ResponseEntity<List<User>> {
+    fun getFriendRequestsSent(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = User.get(ObjectId(id))
-            ResponseEntity.ok(Friend.getSentRequests(user))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getSentRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
@@ -185,10 +187,10 @@ class UserController {
             ApiResponse(code = 200, message = "Friend requests retrieved"),
             ApiResponse(code = 404, message = "User does not exist")
     )
-    fun getFriendRequestsReceived(@PathVariable id: String): ResponseEntity<List<User>> {
+    fun getFriendRequestsReceived(@PathVariable id: String): ResponseEntity<List<UserModel>> {
         return try {
-            val user = User.get(ObjectId(id))
-            ResponseEntity.ok(Friend.getReceivedRequests(user))
+            val user = database.getUser(id)
+            ResponseEntity.ok(database.getReceivedRequests(user.id))
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }

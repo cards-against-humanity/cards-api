@@ -18,7 +18,7 @@ fun toMap(result: ResultActions): Map<String, Any> {
 
 @Throws(Exception::class)
 fun toList(result: ResultActions): List<Any> {
-    return ObjectMapper().readValue(result.andReturn().response.contentAsString, ArrayList::class.java)
+    return ObjectMapper().readValue(result.andReturn().response.contentAsString, ArrayList::class.java) as List<Any>
 }
 
 @Throws(Exception::class)

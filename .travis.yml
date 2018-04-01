@@ -4,8 +4,10 @@ jdk:
   - oraclejdk8
 
 script:
-  - mvn clean package
-  - mvn cobertura:cobertura
+  - mvn clean deploy
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - docker images
+  - docker push $DOCKER_USERNAME/cards-api
 
 services:
   - mongodb

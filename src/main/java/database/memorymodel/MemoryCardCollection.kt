@@ -4,6 +4,7 @@ import route.card.model.CardCollection
 import route.card.model.CardModel
 import route.card.model.CardpackModel
 import route.user.model.UserCollection
+import route.user.model.UserModel
 
 class MemoryCardCollection(private val userCollection: UserCollection) : CardCollection {
     private var cardpackId = 0
@@ -12,11 +13,11 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
     private val cards: MutableMap<String, MutableList<CardModel>> = HashMap()
 
     override fun createCardpack(name: String, userId: String): CardpackModel {
-        userCollection.getUser(userId)
+        val user = userCollection.getUser(userId)
         if (cardpacks[userId] == null) {
             cardpacks[userId] = ArrayList()
         }
-        val cardpack = MemoryCardpackModel(this.cardpackId.toString(), name, userId, cards)
+        val cardpack = MemoryCardpackModel(this.cardpackId.toString(), name, user, cards)
         cardpacks[userId]!!.add(cardpack)
         this.cardpackId++
         return cardpack
@@ -96,7 +97,7 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
         throw Exception("Card does not exist with id: $cardId")
     }
 
-    private class MemoryCardpackModel(override val id: String, override var name: String, override val ownerId: String, private val cardsByCardpack: Map<String, MutableList<CardModel>>) : CardpackModel {
+    private class MemoryCardpackModel(override val id: String, override var name: String, override val owner: UserModel, private val cardsByCardpack: Map<String, MutableList<CardModel>>) : CardpackModel {
         override fun setName(name: String): CardpackModel {
             this.name = name
             return this

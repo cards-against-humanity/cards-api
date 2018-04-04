@@ -59,7 +59,7 @@ fun userEquals(user: UserModel, obj: Any): Boolean {
 }
 
 fun cardpackEquals(cardpackOne: CardpackModel, cardpackTwo: CardpackModel): Boolean {
-    return cardpackOne.id == cardpackTwo.id && cardpackOne.name == cardpackTwo.name && cardpackOne.ownerId == cardpackTwo.ownerId
+    return cardpackOne.id == cardpackTwo.id && cardpackOne.name == cardpackTwo.name && cardpackOne.owner.id == cardpackTwo.owner.id
 }
 
 fun cardEquals(cardOne: CardModel, cardTwo: CardModel): Boolean {

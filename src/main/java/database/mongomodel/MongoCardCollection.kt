@@ -7,17 +7,18 @@ import route.card.model.CardCollection
 import route.card.model.CardModel
 import route.card.model.CardpackModel
 import route.user.model.UserCollection
+import route.user.model.UserModel
 
 class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<Document>, private val mongoCollectionCards: MongoCollection<Document>, private val userCollection: UserCollection) : CardCollection {
     override fun createCardpack(name: String, userId: String): CardpackModel {
-        userCollection.getUser(userId)
+        val user = userCollection.getUser(userId)
         val id = ObjectId()
         mongoCollectionCardpacks.insertOne(Document()
                 .append("_id", id)
                 .append("name", name)
                 .append("ownerId", userId)
         )
-        return MongoCardpackModel(id.toHexString(), name, userId, mongoCollectionCardpacks, mongoCollectionCards)
+        return MongoCardpackModel(id.toHexString(), name, user, mongoCollectionCardpacks, mongoCollectionCards)
     }
 
     override fun createCard(text: String, cardpackId: String): CardModel {
@@ -73,18 +74,18 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
     override fun getCardpack(id: String): CardpackModel {
         try {
             val doc = mongoCollectionCardpacks.find(Document("_id", ObjectId(id))).first()
-            return MongoCardpackModel(id, doc["name"] as String, doc["ownerId"] as String, mongoCollectionCardpacks, mongoCollectionCards)
+            return MongoCardpackModel(id, doc["name"] as String, userCollection.getUser(doc["ownerId"] as String), mongoCollectionCardpacks, mongoCollectionCards)
         } catch (e: Exception) {
             throw Exception("Cardpack does not exist with id: $id")
         }
     }
 
     override fun getCardpacks(userId: String): List<CardpackModel> {
-        userCollection.getUser(userId)
+        val user = userCollection.getUser(userId)
         val docs = mongoCollectionCardpacks.find(Document("ownerId", userId)).toList()
         return docs.map { doc ->
             val id = doc["_id"] as ObjectId
-            MongoCardpackModel(id.toHexString(), doc["name"] as String, userId, mongoCollectionCardpacks, mongoCollectionCards)
+            MongoCardpackModel(id.toHexString(), doc["name"] as String, user, mongoCollectionCardpacks, mongoCollectionCards)
         }
     }
 
@@ -100,7 +101,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
     private class MongoCardpackModel(
             override val id: String,
             override var name: String,
-            override val ownerId: String,
+            override val owner: UserModel,
             private val mongoCollectionCardpacks: MongoCollection<Document>,
             private val mongoCollectionCards: MongoCollection<Document>) : CardpackModel {
 

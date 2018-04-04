@@ -54,6 +54,21 @@ class CardController(private val database: DatabaseCollection) {
         }
     }
 
+    @RequestMapping(value = "/{userId}/cardpacks", method = [RequestMethod.GET])
+    @ApiOperation(value = "Get all cardpacks belonging to a certain user")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cardpacks retrieved"),
+            ApiResponse(code = 404, message = "User does not exist")
+    )
+    fun getCardpacksByUser(@PathVariable userId: String): ResponseEntity<List<CardpackModel>> {
+        return try {
+            val cardpacks = database.getCardpacks(userId)
+            ResponseEntity.ok(cardpacks)
+        } catch (e: Exception) {
+            ResponseEntity.notFound().build()
+        }
+    }
+
     @RequestMapping(value = "/cardpack/{id}", method = [RequestMethod.PATCH])
     @ApiOperation(value = "Edit a cardpack")
     @ApiResponses(

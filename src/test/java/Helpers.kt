@@ -33,6 +33,22 @@ fun resEquals(result: ResultActions, cardpack: CardpackModel): Boolean {
     return cardpack.id == map["id"]
 }
 
+@Throws(Exception::class)
+fun resEquals(result: ResultActions, cardpacks: List<CardpackModel>): Boolean {
+    val list = toList(result) as List<Map<String, String>>
+    if (list.size != cardpacks.size) {
+        return false
+    }
+    cardpacks.forEachIndexed { i, cardpack ->
+        run {
+            if (cardpack.id != list[i]["id"]) {
+                return false
+            }
+        }
+    }
+    return true
+}
+
 fun userEquals(user: UserModel, obj: Any): Boolean {
     return try {
         obj as Map<String, String>

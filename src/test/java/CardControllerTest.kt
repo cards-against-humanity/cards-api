@@ -74,6 +74,25 @@ class CardControllerTest {
     }
 
     @Test
+    fun getCardpacksByUser() {
+        var getReq: MockHttpServletRequestBuilder
+        var result: ResultActions
+        val cardpackOne = database.createCardpack("cardpackOne", userOne.id)
+        val cardpackTwo = database.createCardpack("cardpackTwo", userOne.id)
+
+        getReq = get("/${userOne.id}/cardpacks/")
+        result = mockMvc.perform(getReq).andExpect(status().isOk)
+        assert(resEquals(result, listOf(cardpackOne, cardpackTwo)))
+
+        getReq = get("/${userTwo.id}/cardpacks/")
+        result = mockMvc.perform(getReq).andExpect(status().isOk)
+        assert(resEquals(result, listOf()))
+
+        getReq = get("/${"fake_user_id"}/cardpacks")
+        mockMvc.perform(getReq).andExpect(status().isNotFound)
+    }
+
+    @Test
     fun patchCardpack() {
         var patchReq: MockHttpServletRequestBuilder
         var patchList: MutableList<Document>

@@ -8,10 +8,10 @@ interface CardCollection {
     fun deleteCardpack(id: String)
     fun getCardpack(id: String): CardpackModel
     fun getCardpacks(userId: String): List<CardpackModel>
-    fun createWhiteCard(card: JsonWhiteCard): WhiteCardModel
-    fun createWhiteCards(cards: List<JsonWhiteCard>): List<WhiteCardModel>
-    fun createBlackCard(card: JsonBlackCard): BlackCardModel
-    fun createBlackCards(cards: List<JsonBlackCard>): List<BlackCardModel>
+    fun createWhiteCard(card: JsonWhiteCard, cardpackId: String): WhiteCardModel
+    fun createWhiteCards(cards: List<JsonWhiteCard>, cardpackId: String): List<WhiteCardModel>
+    fun createBlackCard(card: JsonBlackCard, cardpackId: String): BlackCardModel
+    fun createBlackCards(cards: List<JsonBlackCard>, cardpackId: String): List<BlackCardModel>
     fun deleteWhiteCard(id: String)
     fun deleteWhiteCards(ids: List<String>)
     fun deleteBlackCard(id: String)

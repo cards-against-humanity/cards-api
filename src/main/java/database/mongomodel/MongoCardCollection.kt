@@ -21,37 +21,37 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
         return MongoCardpackModel(id.toHexString(), name, user, ArrayList(), ArrayList(), mongoCollectionCardpacks)
     }
 
-    override fun createWhiteCard(card: JsonWhiteCard): WhiteCardModel {
-        this.getCardpack(card.cardpackId)
+    override fun createWhiteCard(card: JsonWhiteCard, cardpackId: String): WhiteCardModel {
+        this.getCardpack(cardpackId)
         val id = ObjectId()
         mongoCollectionWhiteCards.insertOne(Document()
                 .append("_id", id)
                 .append("text", card.text)
-                .append("cardpackId", card.cardpackId)
+                .append("cardpackId", cardpackId)
         )
-        return MongoWhiteCardModel(id.toHexString(), card.text, card.cardpackId, mongoCollectionWhiteCards)
+        return MongoWhiteCardModel(id.toHexString(), card.text, cardpackId, mongoCollectionWhiteCards)
     }
 
-    override fun createBlackCard(card: JsonBlackCard): BlackCardModel {
-        this.getCardpack(card.cardpackId)
+    override fun createBlackCard(card: JsonBlackCard, cardpackId: String): BlackCardModel {
+        this.getCardpack(cardpackId)
         val id = ObjectId()
         mongoCollectionBlackCards.insertOne(Document()
                 .append("_id", id)
                 .append("text", card.text)
                 .append("answerFields", card.answerFields)
-                .append("cardpackId", card.cardpackId)
+                .append("cardpackId", cardpackId)
         )
-        return MongoBlackCardModel(id.toHexString(), card.text, card.answerFields, card.cardpackId, mongoCollectionBlackCards)
+        return MongoBlackCardModel(id.toHexString(), card.text, card.answerFields, cardpackId, mongoCollectionBlackCards)
     }
 
-    override fun createWhiteCards(cards: List<JsonWhiteCard>): List<WhiteCardModel> {
+    override fun createWhiteCards(cards: List<JsonWhiteCard>, cardpackId: String): List<WhiteCardModel> {
         // TODO - Improve efficiency and assert atomicity
-        return cards.map { card -> createWhiteCard(card) }
+        return cards.map { card -> createWhiteCard(card, cardpackId) }
     }
 
-    override fun createBlackCards(cards: List<JsonBlackCard>): List<BlackCardModel> {
+    override fun createBlackCards(cards: List<JsonBlackCard>, cardpackId: String): List<BlackCardModel> {
         // TODO - Improve efficiency and assert atomicity
-        return cards.map { card -> createBlackCard(card) }
+        return cards.map { card -> createBlackCard(card, cardpackId) }
     }
 
     override fun deleteCardpack(id: String) {

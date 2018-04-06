@@ -26,30 +26,30 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
         return cardpack
     }
 
-    override fun createWhiteCard(cardData: JsonWhiteCard): WhiteCardModel {
-        val cardpack = this.getCardpack(cardData.cardpackId) as MemoryCardpackModel
-        val card = MemoryWhiteCardModel(this.whiteCardId.toString(), cardData.text, cardData.cardpackId)
+    override fun createWhiteCard(cardData: JsonWhiteCard, cardpackId: String): WhiteCardModel {
+        val cardpack = this.getCardpack(cardpackId) as MemoryCardpackModel
+        val card = MemoryWhiteCardModel(this.whiteCardId.toString(), cardData.text, cardpackId)
         cardpack.whiteCards.add(card)
         this.whiteCardId++
         return card
     }
 
-    override fun createWhiteCards(cardDataList: List<JsonWhiteCard>): List<WhiteCardModel> {
+    override fun createWhiteCards(cardDataList: List<JsonWhiteCard>, cardpackId: String): List<WhiteCardModel> {
         // TODO - Test for atomicity
-        return cardDataList.map { cardData -> this.createWhiteCard(cardData) }
+        return cardDataList.map { cardData -> this.createWhiteCard(cardData, cardpackId) }
     }
 
-    override fun createBlackCard(cardData: JsonBlackCard): BlackCardModel {
-        val cardpack = this.getCardpack(cardData.cardpackId) as MemoryCardpackModel
-        val card = MemoryBlackCardModel(this.blackCardId.toString(), cardData.text, cardData.answerFields, cardData.cardpackId)
+    override fun createBlackCard(cardData: JsonBlackCard, cardpackId: String): BlackCardModel {
+        val cardpack = this.getCardpack(cardpackId) as MemoryCardpackModel
+        val card = MemoryBlackCardModel(this.blackCardId.toString(), cardData.text, cardData.answerFields, cardpackId)
         cardpack.blackCards.add(card)
         this.blackCardId++
         return card
     }
 
-    override fun createBlackCards(cardDataList: List<JsonBlackCard>): List<BlackCardModel> {
+    override fun createBlackCards(cardDataList: List<JsonBlackCard>, cardpackId: String): List<BlackCardModel> {
         // TODO - Test for atomicity
-        return cardDataList.map { cardData -> this.createBlackCard(cardData) }
+        return cardDataList.map { cardData -> this.createBlackCard(cardData, cardpackId) }
     }
 
     override fun deleteCardpack(cardpackId: String) {

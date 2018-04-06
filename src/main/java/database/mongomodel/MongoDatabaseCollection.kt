@@ -11,5 +11,5 @@ class MongoDatabaseCollection(
         private val mongoDatabase: MongoDatabase,
         private val mongoUserCollection: MongoUserCollection = MongoUserCollection(mongoDatabase.getCollection("user")),
         private val mongoFriendCollection: MongoFriendCollection = MongoFriendCollection(mongoDatabase.getCollection("friend"), mongoUserCollection),
-        private val mongoCardCollection: MongoCardCollection = MongoCardCollection(mongoDatabase.getCollection("cardpack"), mongoDatabase.getCollection("card"), mongoUserCollection)
+        private val mongoCardCollection: MongoCardCollection = MongoCardCollection(mongoDatabase.getCollection("cardpack"), mongoDatabase.getCollection("whitecard"), mongoDatabase.getCollection("blackcard"), mongoUserCollection)
 ) : UserCollection by mongoUserCollection, FriendCollection by mongoFriendCollection, CardCollection by mongoCardCollection, DatabaseCollection

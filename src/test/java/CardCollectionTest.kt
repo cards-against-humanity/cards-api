@@ -37,7 +37,7 @@ class CardCollectionTest {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            assert(cardpackEquals(collections.cardCollection.getCardpack(cardpack.id), cardpack))
+            assertCardpackEquals(collections.cardCollection.getCardpack(cardpack.id), cardpack)
         })}
     }
 
@@ -308,8 +308,15 @@ class CardCollectionTest {
     fun getExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
-            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            assert(cardpackEquals(cardpack, collections.cardCollection.getCardpack(cardpack.id)))
+            var cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            collections.cardCollection.createWhiteCard(JsonWhiteCard("white_card_text", cardpack.id))
+            collections.cardCollection.createBlackCard(JsonBlackCard("black_card_text", 1, cardpack.id))
+            cardpack = collections.cardCollection.getCardpack(cardpack.id)
+            assertEquals(1, cardpack.whiteCards.size)
+            assertEquals(1, cardpack.blackCards.size)
+            assertEquals("white_card_text", cardpack.whiteCards[0].text)
+            assertEquals("black_card_text", cardpack.blackCards[0].text)
+            assertEquals(cardpack.id, cardpack.id)
         })}
     }
 
@@ -330,14 +337,20 @@ class CardCollectionTest {
             val cardpackTwo = collections.cardCollection.createCardpack("cardpack_name", userTwo.id)
             val cardpackThree = collections.cardCollection.createCardpack("cardpack_name", userOne.id)
             val cardpackFour = collections.cardCollection.createCardpack("cardpack_name", userTwo.id)
+            collections.cardCollection.createWhiteCard(JsonWhiteCard("white_card_text", cardpackOne.id))
+            collections.cardCollection.createBlackCard(JsonBlackCard("black_card_text", 1, cardpackOne.id))
 
             val userOneCardpacks = collections.cardCollection.getCardpacks(userOne.id)
-            assert(cardpackEquals(cardpackOne, userOneCardpacks[0]))
-            assert(cardpackEquals(cardpackThree, userOneCardpacks[1]))
+            assertEquals(cardpackOne.id, userOneCardpacks[0].id)
+            assertEquals(cardpackThree.id, userOneCardpacks[1].id)
+            assertEquals(1, userOneCardpacks[0].whiteCards.size)
+            assertEquals(1, userOneCardpacks[0].blackCards.size)
+            assertEquals("white_card_text", userOneCardpacks[0].whiteCards[0].text)
+            assertEquals("black_card_text", userOneCardpacks[0].blackCards[0].text)
 
             val userTwoCardpacks = collections.cardCollection.getCardpacks(userTwo.id)
-            assert(cardpackEquals(cardpackTwo, userTwoCardpacks[0]))
-            assert(cardpackEquals(cardpackFour, userTwoCardpacks[1]))
+            assertEquals(cardpackTwo.id, userTwoCardpacks[0].id)
+            assertEquals(cardpackFour.id, userTwoCardpacks[1].id)
         })}
     }
 

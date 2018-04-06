@@ -4,7 +4,8 @@ import com.mongodb.ServerAddress
 import com.mongodb.client.MongoCollection
 import org.bson.Document
 import org.springframework.test.web.servlet.ResultActions
-import route.card.model.CardModel
+import route.card.model.BlackCardModel
+import route.card.model.WhiteCardModel
 import route.card.model.CardpackModel
 import route.user.model.UserModel
 import java.net.InetAddress
@@ -58,12 +59,39 @@ fun userEquals(user: UserModel, obj: Any): Boolean {
     }
 }
 
-fun cardpackEquals(cardpackOne: CardpackModel, cardpackTwo: CardpackModel): Boolean {
-    return cardpackOne.id == cardpackTwo.id && cardpackOne.name == cardpackTwo.name && cardpackOne.owner.id == cardpackTwo.owner.id
+fun assertCardpackEquals(cardpackOne: CardpackModel, cardpackTwo: CardpackModel) {
+    if (cardpackOne.whiteCards.size != cardpackTwo.whiteCards.size) {
+        throw Exception("Cardpack one has ${cardpackOne.whiteCards.size} white cards, but cardpack two has ${cardpackTwo.whiteCards.size}")
+    } else if (cardpackOne.blackCards.size != cardpackTwo.blackCards.size) {
+        throw Exception("Cardpack one has ${cardpackOne.blackCards.size} black cards, but cardpack two has ${cardpackTwo.blackCards.size}")
+    }
+    cardpackOne.whiteCards.forEachIndexed { i, card ->
+        if (!whiteCardEquals(card, cardpackTwo.whiteCards[i])) {
+            throw Exception("Failed at white card at index $i")
+        }
+    }
+    cardpackOne.blackCards.forEachIndexed { i, card ->
+        if (!blackCardEquals(card, cardpackTwo.blackCards[i])) {
+            throw Exception("Failed at black card at index $i")
+        }
+    }
+    if (cardpackOne.id != cardpackTwo.id) {
+        throw Exception("Cardpacks do not have matching ids")
+    }
+    if (cardpackOne.name != cardpackTwo.name) {
+        throw Exception("Cardpacks do not have matching names")
+    }
+    if (!usersAreEqual(cardpackOne.owner, cardpackTwo.owner)) {
+        throw Exception("Cardpacks do not have the same owners")
+    }
 }
 
-fun cardEquals(cardOne: CardModel, cardTwo: CardModel): Boolean {
+fun whiteCardEquals(cardOne: WhiteCardModel, cardTwo: WhiteCardModel): Boolean {
     return cardOne.id == cardTwo.id && cardOne.text == cardTwo.text && cardOne.cardpackId == cardTwo.cardpackId
+}
+
+fun blackCardEquals(cardOne: BlackCardModel, cardTwo: BlackCardModel): Boolean {
+    return cardOne.id == cardTwo.id && cardOne.text == cardTwo.text && cardOne.cardpackId == cardTwo.cardpackId && cardOne.answerFields == cardTwo.answerFields
 }
 
 @Throws(Exception::class)

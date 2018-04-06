@@ -28,7 +28,7 @@ class CardCollectionTest {
         val memCardCollection = MemoryCardCollection(memUserCollection)
 
         val mongoUserCollection = MongoUserCollection(getTestMongoCollection("users"))
-        val mongoCardCollection = MongoCardCollection(getTestMongoCollection("cardpacks"), getTestMongoCollection("cards"), mongoUserCollection)
+        val mongoCardCollection = MongoCardCollection(getTestMongoCollection("cardpacks"), getTestMongoCollection("whitecards"), getTestMongoCollection("blackcards"), mongoUserCollection)
         collections = listOf(CollectionGroup(memUserCollection, memCardCollection), CollectionGroup(mongoUserCollection, mongoCardCollection))
     }
 
@@ -93,12 +93,13 @@ class CardCollectionTest {
     fun createWhiteCardsForExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
-            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            var cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
             assertEquals(0, cardpack.whiteCards.size)
             assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
             val cards = collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", cardpack.id), JsonWhiteCard("card_1", cardpack.id), JsonWhiteCard("card_2", cardpack.id)))
+
+            cardpack = collections.cardCollection.getCardpack(cardpack.id)
             assertEquals(3, cardpack.whiteCards.size)
-            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
             assertEquals("card_0", cardpack.whiteCards[0].text)
             assertEquals("card_1", cardpack.whiteCards[1].text)
             assertEquals("card_2", cardpack.whiteCards[2].text)
@@ -109,12 +110,13 @@ class CardCollectionTest {
     fun createBlackCardsForExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
-            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            var cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
             assertEquals(0, cardpack.blackCards.size)
             assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
             val cards = collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, cardpack.id), JsonBlackCard("card_1", 2, cardpack.id), JsonBlackCard("card_2", 3, cardpack.id)))
+
+            cardpack = collections.cardCollection.getCardpack(cardpack.id)
             assertEquals(3, cardpack.blackCards.size)
-            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
             assertEquals("card_0", cardpack.blackCards[0].text)
             assertEquals("card_1", cardpack.blackCards[1].text)
             assertEquals("card_2", cardpack.blackCards[2].text)
@@ -230,7 +232,7 @@ class CardCollectionTest {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
             val cards = collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", cardpack.id), JsonWhiteCard("card_1", cardpack.id), JsonWhiteCard("card_2", cardpack.id)))
-            collections.cardCollection.deleteWhiteCards(cardpack.whiteCards.map { card -> card.id })
+            collections.cardCollection.deleteWhiteCards(cards.map { card -> card.id })
             assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
             assertEquals(0, cardpack.whiteCards.size)
         })}
@@ -242,7 +244,7 @@ class CardCollectionTest {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
             val cards = collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, cardpack.id), JsonBlackCard("card_1", 1, cardpack.id), JsonBlackCard("card_2", 1, cardpack.id)))
-            collections.cardCollection.deleteBlackCards(cardpack.blackCards.map { card -> card.id })
+            collections.cardCollection.deleteBlackCards(cards.map { card -> card.id })
             assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
             assertEquals(0, cardpack.blackCards.size)
         })}

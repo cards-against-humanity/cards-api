@@ -1,41 +1,55 @@
 package database.memorymodel
 
+import route.card.JsonBlackCard
+import route.card.JsonWhiteCard
+import route.card.model.BlackCardModel
 import route.card.model.CardCollection
-import route.card.model.CardModel
 import route.card.model.CardpackModel
+import route.card.model.WhiteCardModel
 import route.user.model.UserCollection
 import route.user.model.UserModel
 
 class MemoryCardCollection(private val userCollection: UserCollection) : CardCollection {
     private var cardpackId = 0
-    private var cardId = 0
+    private var whiteCardId = 0
+    private var blackCardId = 0
     private val cardpacks: MutableMap<String, MutableList<CardpackModel>> = HashMap()
-    private val cards: MutableMap<String, MutableList<CardModel>> = HashMap()
 
     override fun createCardpack(name: String, userId: String): CardpackModel {
         val user = userCollection.getUser(userId)
         if (cardpacks[userId] == null) {
             cardpacks[userId] = ArrayList()
         }
-        val cardpack = MemoryCardpackModel(this.cardpackId.toString(), name, user, cards)
+        val cardpack = MemoryCardpackModel(this.cardpackId.toString(), name, user)
         cardpacks[userId]!!.add(cardpack)
         this.cardpackId++
         return cardpack
     }
 
-    override fun createCard(text: String, cardpackId: String): CardModel {
-        this.getCardpack(cardpackId)
-        if (cards[cardpackId] == null) {
-            cards[cardpackId] = ArrayList()
-        }
-        val card = MemoryCardModel(this.cardId.toString(), text, cardpackId)
-        cards[cardpackId]!!.add(card)
-        this.cardId++
+    override fun createWhiteCard(cardData: JsonWhiteCard): WhiteCardModel {
+        val cardpack = this.getCardpack(cardData.cardpackId) as MemoryCardpackModel
+        val card = MemoryWhiteCardModel(this.whiteCardId.toString(), cardData.text, cardData.cardpackId)
+        cardpack.whiteCards.add(card)
+        this.whiteCardId++
         return card
     }
 
-    override fun createCards(textList: List<String>, cardpackId: String): List<CardModel> {
-        return textList.map { text -> this.createCard(text, cardpackId) }
+    override fun createWhiteCards(cardDataList: List<JsonWhiteCard>): List<WhiteCardModel> {
+        // TODO - Test for atomicity
+        return cardDataList.map { cardData -> this.createWhiteCard(cardData) }
+    }
+
+    override fun createBlackCard(cardData: JsonBlackCard): BlackCardModel {
+        val cardpack = this.getCardpack(cardData.cardpackId) as MemoryCardpackModel
+        val card = MemoryBlackCardModel(this.blackCardId.toString(), cardData.text, cardData.answerFields, cardData.cardpackId)
+        cardpack.blackCards.add(card)
+        this.blackCardId++
+        return card
+    }
+
+    override fun createBlackCards(cardDataList: List<JsonBlackCard>): List<BlackCardModel> {
+        // TODO - Test for atomicity
+        return cardDataList.map { cardData -> this.createBlackCard(cardData) }
     }
 
     override fun deleteCardpack(cardpackId: String) {
@@ -43,29 +57,56 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
             throw Exception("Cardpack does not exist with id: $cardpackId")
         }
         cardpacks.remove(cardpackId)
-        cards.remove(cardpackId)
     }
 
-    override fun deleteCard(cardId: String) {
-        for (entry in cards) {
-            val cardList = entry.value
-            for (card in cardList) {
-                if (card.id == cardId) {
-                    cardList.remove(card)
-                    return
+    override fun deleteWhiteCard(cardId: String) {
+        for (entry in cardpacks) {
+            val cardpackList = entry.value
+            for (cardpack in cardpackList) {
+                cardpack as MemoryCardpackModel
+                for (card in cardpack.whiteCards) {
+                    if (card.id == cardId) {
+                        cardpack.whiteCards.remove(card)
+                        return
+                    }
                 }
             }
         }
         throw Exception("Card does not exist with id: $cardId")
     }
 
-    override fun deleteCards(ids: List<String>) {
-        try {
-            ids.forEach { id -> this.getCardpack(this.getCard(id).cardpackId) }
-            ids.forEach { id -> this.deleteCard(id) }
-        } catch (e: Exception) {
-            throw Exception("One or more card ids is invalid")
+    override fun deleteWhiteCards(ids: List<String>) {
+        ids.forEach { id ->
+            if (!whiteCardExists(id)){
+                throw Exception("One or more card ids is invalid")
+            }
         }
+        ids.forEach { id -> this.deleteWhiteCard(id) }
+    }
+
+    override fun deleteBlackCard(cardId: String) {
+        for (entry in cardpacks) {
+            val cardpackList = entry.value
+            for (cardpack in cardpackList) {
+                cardpack as MemoryCardpackModel
+                for (card in cardpack.blackCards) {
+                    if (card.id == cardId) {
+                        cardpack.blackCards.remove(card)
+                        return
+                    }
+                }
+            }
+        }
+        throw Exception("Card does not exist with id: $cardId")
+    }
+
+    override fun deleteBlackCards(ids: List<String>) {
+        ids.forEach { id ->
+            if (!blackCardExists(id)){
+                throw Exception("One or more card ids is invalid")
+            }
+        }
+        ids.forEach { id -> this.deleteBlackCard(id) }
     }
 
     override fun getCardpack(cardpackId: String): CardpackModel {
@@ -85,31 +126,55 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
         return cardpacks[userId] ?: ArrayList()
     }
 
-    override fun getCard(cardId: String): CardModel {
-        for (entry in cards) {
-            val cardList = entry.value
-            for (card in cardList) {
-                if (card.id == cardId) {
-                    return card
+    private fun whiteCardExists(id: String): Boolean {
+        for (entry in cardpacks) {
+            val cardpackList = entry.value
+            for (cardpack in cardpackList) {
+                cardpack as MemoryCardpackModel
+                for (card in cardpack.whiteCards) {
+                    if (card.id == id) {
+                        return true
+                    }
                 }
             }
         }
-        throw Exception("Card does not exist with id: $cardId")
+        return false
     }
 
-    private class MemoryCardpackModel(override val id: String, override var name: String, override val owner: UserModel, private val cardsByCardpack: Map<String, MutableList<CardModel>>) : CardpackModel {
+    private fun blackCardExists(id: String): Boolean {
+        for (entry in cardpacks) {
+            val cardpackList = entry.value
+            for (cardpack in cardpackList) {
+                cardpack as MemoryCardpackModel
+                for (card in cardpack.blackCards) {
+                    if (card.id == id) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    private class MemoryCardpackModel(override val id: String, override var name: String, override val owner: UserModel) : CardpackModel {
+        override val whiteCards: MutableList<WhiteCardModel> = ArrayList()
+        override val blackCards: MutableList<BlackCardModel> = ArrayList()
+
         override fun setName(name: String): CardpackModel {
             this.name = name
             return this
         }
+    }
 
-        override fun getCards(): List<CardModel> {
-            return cardsByCardpack[id] ?: ArrayList()
+    private class MemoryWhiteCardModel(override val id: String, override var text: String, override val cardpackId: String) : WhiteCardModel {
+        override fun setText(text: String): WhiteCardModel {
+            this.text = text
+            return this
         }
     }
 
-    private class MemoryCardModel(override val id: String, override var text: String, override val cardpackId: String) : CardModel {
-        override fun setText(text: String): CardModel {
+    private class MemoryBlackCardModel(override val id: String, override var text: String, override val answerFields: Int, override val cardpackId: String) : BlackCardModel {
+        override fun setText(text: String): BlackCardModel {
             this.text = text
             return this
         }

@@ -7,6 +7,8 @@ import database.memorymodel.MemoryCardCollection
 import database.memorymodel.MemoryUserCollection
 import database.mongomodel.MongoCardCollection
 import database.mongomodel.MongoUserCollection
+import route.card.JsonBlackCard
+import route.card.JsonWhiteCard
 import route.card.model.CardCollection
 import route.user.model.UserCollection
 
@@ -48,43 +50,89 @@ class CardCollectionTest {
     }
 
     @TestFactory
-    fun createCardForExistingCardpack(): List<DynamicTest> {
+    fun createWhiteCardForExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            assertEquals(0, cardpack.getCards().size)
-            val card = collections.cardCollection.createCard("card_text", cardpack.id)
-            assertEquals(1, cardpack.getCards().size)
-            assertEquals("card_text", cardpack.getCards()[0].text)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            val card = collections.cardCollection.createWhiteCard(JsonWhiteCard("card_text", cardpack.id))
+            assertEquals(1, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            assertEquals("card_text", collections.cardCollection.getCardpack(cardpack.id).whiteCards[0].text)
         })}
     }
 
     @TestFactory
-    fun createCardForNonExistingCardpack(): List<DynamicTest> {
+    fun createWhiteCardForNonExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.createCard("card_text", "fake_cardpack_id") }
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.createWhiteCard(JsonWhiteCard("card_text", "fake_cardpack_id")) }
             assertEquals("Cardpack does not exist with id: fake_cardpack_id", e.message)
         })}
     }
 
     @TestFactory
-    fun createCardsForExistingCardpack(): List<DynamicTest> {
+    fun createBlackCardForExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            assertEquals(0, cardpack.getCards().size)
-            val cards = collections.cardCollection.createCards(listOf("card_0", "card_1", "card_2"), cardpack.id)
-            assertEquals(3, cardpack.getCards().size)
-            assertEquals("card_0", cardpack.getCards()[0].text)
-            assertEquals("card_1", cardpack.getCards()[1].text)
-            assertEquals("card_2", cardpack.getCards()[2].text)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            val card = collections.cardCollection.createBlackCard(JsonBlackCard("card_text", 4, cardpack.id))
+            assertEquals(1, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            assertEquals("card_text", collections.cardCollection.getCardpack(cardpack.id).blackCards[0].text)
         })}
     }
 
     @TestFactory
-    fun createCardsForNonExistingCardpack(): List<DynamicTest> {
+    fun createBlackCardForNonExistingCardpack(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.createCards(listOf("card_0", "card_1", "card_2"), "fake_cardpack_id") }
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.createBlackCard(JsonBlackCard("card_text", 4, "fake_cardpack_id")) }
+            assertEquals("Cardpack does not exist with id: fake_cardpack_id", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun createWhiteCardsForExistingCardpack(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            assertEquals(0, cardpack.whiteCards.size)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            val cards = collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", cardpack.id), JsonWhiteCard("card_1", cardpack.id), JsonWhiteCard("card_2", cardpack.id)))
+            assertEquals(3, cardpack.whiteCards.size)
+            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            assertEquals("card_0", cardpack.whiteCards[0].text)
+            assertEquals("card_1", cardpack.whiteCards[1].text)
+            assertEquals("card_2", cardpack.whiteCards[2].text)
+        })}
+    }
+
+    @TestFactory
+    fun createBlackCardsForExistingCardpack(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            assertEquals(0, cardpack.blackCards.size)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            val cards = collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, cardpack.id), JsonBlackCard("card_1", 2, cardpack.id), JsonBlackCard("card_2", 3, cardpack.id)))
+            assertEquals(3, cardpack.blackCards.size)
+            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            assertEquals("card_0", cardpack.blackCards[0].text)
+            assertEquals("card_1", cardpack.blackCards[1].text)
+            assertEquals("card_2", cardpack.blackCards[2].text)
+        })}
+    }
+
+    @TestFactory
+    fun createWhiteCardsForNonExistingCardpack(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", "fake_cardpack_id"), JsonWhiteCard("card_1", "fake_cardpack_id"), JsonWhiteCard("card_2", "fake_cardpack_id"))) }
+            assertEquals("Cardpack does not exist with id: fake_cardpack_id", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun createBlackCardsForNonExistingCardpack(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, "fake_cardpack_id"), JsonBlackCard("card_1", 1, "fake_cardpack_id"), JsonBlackCard("card_2", 1, "fake_cardpack_id"))) }
             assertEquals("Cardpack does not exist with id: fake_cardpack_id", e.message)
         })}
     }
@@ -108,67 +156,149 @@ class CardCollectionTest {
         })}
     }
 
+//    @TestFactory
+//    fun removeExistingWhiteCardsWhenDeletingCardpack(): List<DynamicTest> {
+//        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+//            val user = collections.userCollection.createUser("user", "1234", "google")
+//            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+//            val card = collections.cardCollection.createWhiteCard(JsonWhiteCard("card_text", cardpack.id))
+//            collections.cardCollection.deleteCardpack(cardpack.id)
+//            val e = assertThrows(Exception::class.java) { collections.cardCollection.getCard(card.id) }
+//            assertEquals("Card does not exist with id: ${card.id}", e.message)
+//        })}
+//    }
+//
+//    @TestFactory
+//    fun removeExistingBlackCardsWhenDeletingCardpack(): List<DynamicTest> {
+//        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+//            val user = collections.userCollection.createUser("user", "1234", "google")
+//            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+//            val card = collections.cardCollection.createBlackCard(JsonBlackCard("card_text", 2, cardpack.id))
+//            collections.cardCollection.deleteCardpack(cardpack.id)
+//            val e = assertThrows(Exception::class.java) { collections.cardCollection.getCard(card.id) }
+//            assertEquals("Card does not exist with id: ${card.id}", e.message)
+//        })}
+//    }
+
     @TestFactory
-    fun removeExistingCardsWhenDeletingCardpack(): List<DynamicTest> {
+    fun deleteExistingWhiteCard(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val card = collections.cardCollection.createCard("card_text", cardpack.id)
-            collections.cardCollection.deleteCardpack(cardpack.id)
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.getCard(card.id) }
+            val card = collections.cardCollection.createWhiteCard(JsonWhiteCard("card_text", cardpack.id))
+            collections.cardCollection.deleteWhiteCard(card.id)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            assertEquals(0, cardpack.whiteCards.size)
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteWhiteCard(card.id) }
             assertEquals("Card does not exist with id: ${card.id}", e.message)
         })}
     }
 
     @TestFactory
-    fun deleteExistingCard(): List<DynamicTest> {
+    fun deleteNonExistingWhiteCard(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val user = collections.userCollection.createUser("user", "1234", "google")
-            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val card = collections.cardCollection.createCard("card_text", cardpack.id)
-            collections.cardCollection.deleteCard(card.id)
-            assertEquals(0, cardpack.getCards().size)
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCard(card.id) }
-            assertEquals("Card does not exist with id: ${card.id}", e.message)
-        })}
-    }
-
-    @TestFactory
-    fun deleteNonExistingCard(): List<DynamicTest> {
-        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCard("fake_card_id") }
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteWhiteCard("fake_card_id") }
             assertEquals("Card does not exist with id: fake_card_id", e.message)
         })}
     }
 
     @TestFactory
-    fun deleteExistingCards(): List<DynamicTest> {
+    fun deleteExistingBlackCard(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val cards = collections.cardCollection.createCards(listOf("card_0", "card_1", "card_2"), cardpack.id)
-            collections.cardCollection.deleteCards(cardpack.getCards().map { card -> card.id })
-            assertEquals(0, cardpack.getCards().size)
+            val card = collections.cardCollection.createBlackCard(JsonBlackCard("card_text", 1, cardpack.id))
+            collections.cardCollection.deleteBlackCard(card.id)
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            assertEquals(0, cardpack.blackCards.size)
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteBlackCard(card.id) }
+            assertEquals("Card does not exist with id: ${card.id}", e.message)
         })}
     }
 
     @TestFactory
-    fun deleteNonExistingCards(): List<DynamicTest> {
+    fun deleteNonExistingBlackCard(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCards(listOf("fake", "id")) }
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteBlackCard("fake_card_id") }
+            assertEquals("Card does not exist with id: fake_card_id", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun deleteExistingWhiteCards(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            val cards = collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", cardpack.id), JsonWhiteCard("card_1", cardpack.id), JsonWhiteCard("card_2", cardpack.id)))
+            collections.cardCollection.deleteWhiteCards(cardpack.whiteCards.map { card -> card.id })
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+            assertEquals(0, cardpack.whiteCards.size)
+        })}
+    }
+
+    @TestFactory
+    fun deleteExistingBlackCards(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            val cards = collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, cardpack.id), JsonBlackCard("card_1", 1, cardpack.id), JsonBlackCard("card_2", 1, cardpack.id)))
+            collections.cardCollection.deleteBlackCards(cardpack.blackCards.map { card -> card.id })
+            assertEquals(0, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
+            assertEquals(0, cardpack.blackCards.size)
+        })}
+    }
+
+    @TestFactory
+    fun deleteNonExistingWhiteCards(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteWhiteCards(listOf("fake", "id")) }
             assertEquals("One or more card ids is invalid", e.message)
         })}
     }
 
     @TestFactory
-    fun deleteExistingCardsAtomicity(): List<DynamicTest> {
+    fun deleteNonExistingBlackCards(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteBlackCards(listOf("fake", "id")) }
+            assertEquals("One or more card ids is invalid", e.message)
+        })}
+    }
+
+    @TestFactory
+    fun createWhiteCardsAtomicity(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            // TODO - Implement
+        })}
+    }
+
+    @TestFactory
+    fun createBlackCardsAtomicity(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            // TODO - Implement
+        })}
+    }
+
+    @TestFactory
+    fun deleteExistingWhiteCardsAtomicity(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val cards = collections.cardCollection.createCards(listOf("card_0", "card_1", "card_2"), cardpack.id)
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteCards(listOf(cards[0].id, "fake_id", cards[1].id, cards[2].id)) }
+            val cards = collections.cardCollection.createWhiteCards(listOf(JsonWhiteCard("card_0", cardpack.id), JsonWhiteCard("card_1", cardpack.id), JsonWhiteCard("card_2", cardpack.id)))
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteWhiteCards(listOf(cards[0].id, "fake_id", cards[1].id, cards[2].id)) }
             assertEquals("One or more card ids is invalid", e.message)
-            assertEquals(3, cardpack.getCards().size)
+            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).whiteCards.size)
+        })}
+    }
+
+    @TestFactory
+    fun deleteExistingBlackCardsAtomicity(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            val cards = collections.cardCollection.createBlackCards(listOf(JsonBlackCard("card_0", 1, cardpack.id), JsonBlackCard("card_1", 1, cardpack.id), JsonBlackCard("card_2", 1, cardpack.id)))
+            val e = assertThrows(Exception::class.java) { collections.cardCollection.deleteBlackCards(listOf(cards[0].id, "fake_id", cards[1].id, cards[2].id)) }
+            assertEquals("One or more card ids is invalid", e.message)
+            assertEquals(3, collections.cardCollection.getCardpack(cardpack.id).blackCards.size)
         })}
     }
 
@@ -217,23 +347,23 @@ class CardCollectionTest {
         })}
     }
 
-    @TestFactory
-    fun getExistingCard(): List<DynamicTest> {
-        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val user = collections.userCollection.createUser("user", "1234", "google")
-            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val card = collections.cardCollection.createCard("card_text", cardpack.id)
-            assert(cardEquals(card, collections.cardCollection.getCard(card.id)))
-        })}
-    }
-
-    @TestFactory
-    fun getNonExistingCard(): List<DynamicTest> {
-        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
-            val e = assertThrows(Exception::class.java) { collections.cardCollection.getCard("fake_card_id") }
-            assertEquals("Card does not exist with id: fake_card_id", e.message)
-        })}
-    }
+//    @TestFactory
+//    fun getExistingCard(): List<DynamicTest> {
+//        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+//            val user = collections.userCollection.createUser("user", "1234", "google")
+//            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+//            val card = collections.cardCollection.createCard("card_text", cardpack.id)
+//            assert(cardEquals(card, collections.cardCollection.getCard(card.id)))
+//        })}
+//    }
+//
+//    @TestFactory
+//    fun getNonExistingCard(): List<DynamicTest> {
+//        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+//            val e = assertThrows(Exception::class.java) { collections.cardCollection.getCard("fake_card_id") }
+//            assertEquals("Card does not exist with id: fake_card_id", e.message)
+//        })}
+//    }
 
     @TestFactory
     fun setCardpackName(): List<DynamicTest> {
@@ -247,14 +377,26 @@ class CardCollectionTest {
     }
 
     @TestFactory
-    fun setCardText(): List<DynamicTest> {
+    fun setWhiteCardText(): List<DynamicTest> {
         return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
             val user = collections.userCollection.createUser("user", "1234", "google")
             val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
-            val card = collections.cardCollection.createCard("card_text", cardpack.id)
+            val card = collections.cardCollection.createWhiteCard(JsonWhiteCard("card_text", cardpack.id))
             card.setText("new_card_text")
             assertEquals("new_card_text", card.text)
-            assertEquals("new_card_text", collections.cardCollection.getCard(card.id).text)
+            assertEquals("new_card_text", collections.cardCollection.getCardpack(cardpack.id).whiteCards[0].text)
+        })}
+    }
+
+    @TestFactory
+    fun setBlackCardText(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            val card = collections.cardCollection.createBlackCard(JsonBlackCard("card_text", 4, cardpack.id))
+            card.setText("new_card_text")
+            assertEquals("new_card_text", card.text)
+            assertEquals("new_card_text", collections.cardCollection.getCardpack(cardpack.id).blackCards[0].text)
         })}
     }
 }

@@ -16,6 +16,8 @@ import database.memorymodel.MemoryCardCollection
 import route.card.model.CardCollection
 import route.card.model.CardpackModel
 import database.memorymodel.*
+import route.card.JsonBlackCard
+import route.card.JsonWhiteCard
 import route.user.model.UserCollection
 import java.util.ArrayList
 import kotlin.test.assertEquals
@@ -109,13 +111,13 @@ class CardControllerTest {
         patchList.add(Document("foo", "bar"))
         patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
-        assert(cardpackEquals(database.getCardpack(cardpack.id), cardpack))
+        assertCardpackEquals(database.getCardpack(cardpack.id), cardpack)
 
         patchList = ArrayList()
         patchList.add(Document("op", "replace").append("path", "/fakepath"))
         patchReq = patch("/cardpack/" + cardpack.id).contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(patchList))
         mockMvc.perform(patchReq).andExpect(status().isBadRequest)
-        assert(cardpackEquals(database.getCardpack(cardpack.id), cardpack))
+        assertCardpackEquals(database.getCardpack(cardpack.id), cardpack)
 
         patchList = ArrayList()
         patchList.add(Document("op", "replace").append("path", "/name").append("value", "newName"))
@@ -139,44 +141,60 @@ class CardControllerTest {
     }
 
     @Test
-    fun createCard() {
+    fun createWhiteCards() {
         val cardpack = database.createCardpack("cardpack", userOne.id)
         var putReq: MockHttpServletRequestBuilder
 
-        putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf("card1", "card2", "card3")))
+        putReq = put("/cardpack/" + cardpack.id + "/cards/white").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf(JsonWhiteCard("card1"), JsonWhiteCard("card2"), JsonWhiteCard("card3"))))
         mockMvc.perform(putReq).andExpect(status().isOk)
-        assert(cardpack.getCards().size == 3)
-        assert(cardpack.getCards()[0].text == "card1")
-        assert(cardpack.getCards()[1].text == "card2")
-        assert(cardpack.getCards()[2].text == "card3")
+        assert(database.getCardpack(cardpack.id).whiteCards.size == 3)
 
-        putReq = put("/cardpack/" + cardpack.id + "/cards").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(Document("foo", "bar")))
+        putReq = put("/cardpack/" + cardpack.id + "/cards/white").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(Document("foo", "bar")))
         mockMvc.perform(putReq).andExpect(status().isBadRequest)
+
+        putReq = put("/cardpack/" + "fake_cardpack_id" + "/cards/white").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf(JsonWhiteCard("card"))))
+        mockMvc.perform(putReq).andExpect(status().isNotFound)
     }
 
     @Test
-    fun getCards() {
+    fun createBlackCards() {
         val cardpack = database.createCardpack("cardpack", userOne.id)
-        database.createCards(arrayListOf("foo", "bar"), cardpack.id)
+        var putReq: MockHttpServletRequestBuilder
 
-        val result = mockMvc.perform(get("/cardpack/" + cardpack.id + "/cards"))
-        val cardTexts = toList(result) as List<String>
-        assert(cardTexts.size == 2)
-        assert(cardTexts[0] == "foo")
-        assert(cardTexts[1] == "bar")
+        putReq = put("/cardpack/" + cardpack.id + "/cards/black").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf(JsonBlackCard("card1", 1), JsonBlackCard("card2", 1), JsonBlackCard("card3", 1))))
+        mockMvc.perform(putReq).andExpect(status().isOk)
+        assert(database.getCardpack(cardpack.id).blackCards.size == 3)
 
-        mockMvc.perform(get("/cardpack/fake_id/cards")).andExpect(status().isNotFound)
+        putReq = put("/cardpack/" + cardpack.id + "/cards/black").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(Document("foo", "bar")))
+        mockMvc.perform(putReq).andExpect(status().isBadRequest)
+
+        putReq = put("/cardpack/" + "fake_cardpack_id" + "/cards/black").contentType(MediaType.APPLICATION_JSON).content(ObjectMapper().writeValueAsString(arrayListOf(JsonBlackCard("card", 2))))
+        mockMvc.perform(putReq).andExpect(status().isNotFound)
     }
 
     @Test
-    fun deleteCard() {
-        val cardpack = database.createCardpack("cardpack", userOne.id)
-        database.createCards(arrayListOf("foo", "bar"), cardpack.id)
-        assert(cardpack.getCards().size == 2)
-        mockMvc.perform(delete("/card/${cardpack.getCards()[0].id}"))
-        assert(cardpack.getCards().size == 1)
-        assert(cardpack.getCards()[0].text == "bar")
+    fun deleteWhiteCard() {
+        var cardpack = database.createCardpack("cardpack", userOne.id)
+        database.createWhiteCards(arrayListOf(JsonWhiteCard("foo"), JsonWhiteCard("bar")), cardpack.id)
+        cardpack = database.getCardpack(cardpack.id)
+        mockMvc.perform(delete("/cards/white/${cardpack.whiteCards[0].id}")).andExpect(status().isOk)
+        cardpack = database.getCardpack(cardpack.id)
+        assert(cardpack.whiteCards.size == 1)
+        assert(cardpack.whiteCards[0].text == "bar")
 
-        mockMvc.perform(delete("/card/fake_id")).andExpect(status().isNotFound)
+        mockMvc.perform(delete("/cards/white/fake_id")).andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun deleteBlackCard() {
+        var cardpack = database.createCardpack("cardpack", userOne.id)
+        database.createBlackCards(arrayListOf(JsonBlackCard("foo", 1), JsonBlackCard("bar", 1)), cardpack.id)
+        cardpack = database.getCardpack(cardpack.id)
+        mockMvc.perform(delete("/cards/black/${cardpack.blackCards[0].id}")).andExpect(status().isOk)
+        cardpack = database.getCardpack(cardpack.id)
+        assert(cardpack.blackCards.size == 1)
+        assert(cardpack.blackCards[0].text == "bar")
+
+        mockMvc.perform(delete("/cards/black/fake_id")).andExpect(status().isNotFound)
     }
 }

@@ -8,8 +8,7 @@ import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import route.JsonPatchItem
-import route.card.model.CardCollection
-import route.card.model.CardpackModel
+import route.card.model.*
 import route.user.model.UserCollection
 import route.user.model.UserModel
 
@@ -111,43 +110,67 @@ class CardController(private val database: DatabaseCollection) {
         }
     }
 
-    @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.PUT])
-    @ApiOperation(value = "Create cards")
+    @RequestMapping(value = "/cardpack/{id}/cards/white", method = [RequestMethod.PUT])
+    @ApiOperation(value = "Create white cards")
     @ApiResponses(
-            ApiResponse(code = 200, message = "Card successfully deleted"),
+            ApiResponse(code = 200, message = "Cards successfully created"),
             ApiResponse(code = 400, message = "Invalid request body"),
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
-    fun createCards(@RequestBody text: List<String>, @PathVariable id: String): ResponseEntity<Void> {
-        database.createCards(text, id)
+    fun createWhiteCards(@RequestBody cards: List<JsonWhiteCard>, @PathVariable id: String): ResponseEntity<Void> {
+        try {
+            database.getCardpack(id)
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+        database.createWhiteCards(cards, id)
         return ResponseEntity.ok().build()
     }
 
-    @RequestMapping(value = "/card/{id}", method = [RequestMethod.DELETE])
-    fun deleteCard(@PathVariable id: String): ResponseEntity<Void> {
+    @RequestMapping(value = "/cardpack/{id}/cards/black", method = [RequestMethod.PUT])
+    @ApiOperation(value = "Create black cards")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cards successfully created"),
+            ApiResponse(code = 400, message = "Invalid request body"),
+            ApiResponse(code = 404, message = "Cardpack does not exist")
+    )
+    fun createBlackCards(@RequestBody cards: List<JsonBlackCard>, @PathVariable id: String): ResponseEntity<Void> {
+        try {
+            database.getCardpack(id)
+        } catch (e: Exception) {
+            return ResponseEntity.notFound().build()
+        }
+        database.createBlackCards(cards, id)
+        return ResponseEntity.ok().build()
+    }
+
+    @RequestMapping(value = "/cards/white/{id}", method = [RequestMethod.DELETE])
+    @ApiOperation(value = "Delete white card")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "Cards successfully created"),
+            ApiResponse(code = 404, message = "Card does not exist")
+    )
+    fun deleteWhiteCard(@PathVariable id: String): ResponseEntity<Void> {
         return try {
-            database.deleteCard(id)
+            database.deleteWhiteCard(id)
             ResponseEntity.ok().build()
         } catch (e: Exception) {
             ResponseEntity.notFound().build()
         }
     }
 
-    @RequestMapping(value = "/cardpack/{id}/cards", method = [RequestMethod.GET])
-    @ApiOperation(value = "Get cards belonging to a cardpack")
+    @RequestMapping(value = "/cards/black/{id}", method = [RequestMethod.DELETE])
+    @ApiOperation(value = "Delete black card")
     @ApiResponses(
-            ApiResponse(code = 200, message = "Cards retrieved"),
-            ApiResponse(code = 404, message = "Cardpack does not exist")
+            ApiResponse(code = 200, message = "Cards successfully created"),
+            ApiResponse(code = 404, message = "Card does not exist")
     )
-    fun getCards(@PathVariable id: String): ResponseEntity<List<String>> {
-        val cardpack: CardpackModel
-
-        try {
-            cardpack = database.getCardpack(id)
+    fun deleteBlackCard(@PathVariable id: String): ResponseEntity<Void> {
+        return try {
+            database.deleteBlackCard(id)
+            ResponseEntity.ok().build()
         } catch (e: Exception) {
-            return ResponseEntity.notFound().build()
+            ResponseEntity.notFound().build()
         }
-
-        return ResponseEntity.ok(cardpack.getCards().map { card -> card.text })
     }
 }

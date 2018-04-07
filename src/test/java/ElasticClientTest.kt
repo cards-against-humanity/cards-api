@@ -21,7 +21,10 @@ class ElasticClientTest {
     fun reset() {
         database = MemoryDatabaseCollection()
         try {
-            elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.userIndex, ElasticClient.cardpackIndex))
+            elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.userIndex))
+        } catch (e: Exception) { }
+        try {
+            elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.cardpackIndex))
         } catch (e: Exception) { }
         elasticRestClient.indices().create(CreateIndexRequest(ElasticClient.userIndex))
         elasticRestClient.indices().create(CreateIndexRequest(ElasticClient.cardpackIndex))

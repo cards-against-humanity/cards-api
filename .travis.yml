@@ -3,6 +3,9 @@ language: java
 jdk:
   - oraclejdk8
 
+before_script:
+  - sleep 10
+
 script:
   - mvn clean deploy
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin

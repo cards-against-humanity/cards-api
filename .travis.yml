@@ -11,4 +11,5 @@ script:
 
 services:
   - mongodb
+  - elasticsearch
   - docker

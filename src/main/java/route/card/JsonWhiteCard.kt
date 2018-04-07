@@ -1,5 +1,7 @@
 package route.card
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class JsonWhiteCard (
-    val text: String
+    @JsonProperty("text") val text: String
 )

@@ -1,9 +1,15 @@
 package elasticsearch
 
+import route.card.model.CardpackModel
+import route.user.model.UserModel
+
 interface ElasticIndexer {
-    fun index(type: String, id: String, data: Map<String, Any>)
+    fun indexUser(user: UserModel)
+    fun indexCardpack(cardpack: CardpackModel)
+    fun unindexCardpack(cardpackId: String)
 }
 
 interface ElasticSearcher {
-    fun search(type: String, query: String)
+    fun searchUsers(query: String): List<UserModel>
+    fun searchCardpacks(query: String): List<CardpackModel>
 }

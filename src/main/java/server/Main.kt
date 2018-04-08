@@ -2,10 +2,10 @@ package server
 
 import com.mongodb.MongoClient
 import com.mongodb.ServerAddress
-import com.mongodb.client.MongoDatabase
 import config.SwaggerConfig
-import database.DatabaseCollection
 import database.mongomodel.MongoDatabaseCollection
+import elasticsearch.ElasticSearchableDatabaseCollection
+import elasticsearch.SearchableDatabaseCollection
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -19,10 +19,10 @@ import route.AuthInterceptor
 import route.card.CardController
 import route.search.SearchController
 import route.user.UserController
-
 import java.net.InetAddress
-import java.net.UnknownHostException
 import java.util.*
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @EnableAutoConfiguration(exclude = [MongoAutoConfiguration::class])
 @SpringBootApplication
@@ -35,17 +35,27 @@ open class Main : WebMvcConfigurerAdapter() {
         }
     }
 
-    override fun addInterceptors(registry: InterceptorRegistry?) {
-        registry!!.addInterceptor(AuthInterceptor())
+    override fun addInterceptors(registry: InterceptorRegistry) {
+        registry.addInterceptor(AuthInterceptor())
     }
 
     @Bean
-    open fun getDatabase(applicationArguments: ApplicationArguments): DatabaseCollection {
+    open fun getDatabase(applicationArguments: ApplicationArguments): SearchableDatabaseCollection {
         val args = Args(applicationArguments.sourceArgs)
         val address = InetAddress.getByName(args.mongoHost)
         val databaseName = args.mongoDatabase
         val db = MongoClient(ServerAddress(address, args.mongoPort)).getDatabase(databaseName)
-        return MongoDatabaseCollection(db)
+        return ElasticSearchableDatabaseCollection(MongoDatabaseCollection(db), InetAddress.getByName(args.elasticsearchHost), args.elasticsearchPort)
+    }
+
+    @Bean
+    open fun corsConfigurer(applicationArguments: ApplicationArguments): WebMvcConfigurer {
+        val args = Args(applicationArguments.sourceArgs)
+        return object : WebMvcConfigurerAdapter() {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE").allowedOrigins(args.allowedCorsOrigin).allowedHeaders("*")
+            }
+        }
     }
 
     private inner class Args(args: Array<String>) {
@@ -54,6 +64,7 @@ open class Main : WebMvcConfigurerAdapter() {
         val mongoDatabase: String
         val elasticsearchHost: String
         val elasticsearchPort: Int
+        val allowedCorsOrigin: String
 
         init {
             val parsedArgs = parseArgs(args)
@@ -62,6 +73,7 @@ open class Main : WebMvcConfigurerAdapter() {
             this.mongoDatabase = parsedArgs["MONGO_DATABASE"] as String
             this.elasticsearchHost = parsedArgs["ELASTICSEARCH_HOST"] as String
             this.elasticsearchPort = parsedArgs["ELASTICSEARCH_PORT"] as Int
+            this.allowedCorsOrigin = parsedArgs["ALLOWED_CORS_ORIGIN"] as String
         }
 
         private fun parseArgs(args: Array<String>): Map<String, Any> {
@@ -71,8 +83,9 @@ open class Main : WebMvcConfigurerAdapter() {
             argMap["MONGO_DATABASE"] = "appName"
             argMap["ELASTICSEARCH_HOST"] = "elasticsearch"
             argMap["ELASTICSEARCH_PORT"] = 9200
+            argMap["ALLOWED_CORS_ORIGIN"] = "http://localhost"
 
-            val argTypes = HashSet(Arrays.asList("MONGO_HOST", "MONGO_PORT", "MONGO_DATABASE", "ELASTICSEARCH_HOST", "ELASTICSEARCH_PORT"))
+            val argTypes = HashSet(Arrays.asList("MONGO_HOST", "MONGO_PORT", "MONGO_DATABASE", "ELASTICSEARCH_HOST", "ELASTICSEARCH_PORT", "ALLOWED_CORS_ORIGIN"))
             for (arg in args) {
                 val key = arg.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
                 val value = arg.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]

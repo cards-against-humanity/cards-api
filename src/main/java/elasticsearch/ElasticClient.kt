@@ -1,20 +1,15 @@
 package elasticsearch
 
 import database.DatabaseCollection
-import org.apache.http.HttpHost
 import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.SearchRequest
-import org.elasticsearch.action.search.SearchType
-import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.unit.Fuzziness
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import route.card.model.CardpackModel
 import route.user.model.UserModel
-
-import java.net.InetAddress
 
 class ElasticClient(private val elasticClient: RestHighLevelClient, private val database: DatabaseCollection) : ElasticIndexer, ElasticSearcher {
 

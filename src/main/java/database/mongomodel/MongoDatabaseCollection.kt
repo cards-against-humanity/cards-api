@@ -1,6 +1,5 @@
 package database.mongomodel
 
-
 import com.mongodb.client.MongoDatabase
 import database.DatabaseCollection
 import route.card.model.CardCollection

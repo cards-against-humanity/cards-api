@@ -4,12 +4,10 @@ import database.DatabaseCollection
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
-import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import route.JsonPatchItem
 import route.card.model.*
-import route.user.model.UserCollection
 import route.user.model.UserModel
 
 @RestController

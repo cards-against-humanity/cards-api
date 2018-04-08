@@ -24,9 +24,9 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 
-@EnableAutoConfiguration(exclude = arrayOf(MongoAutoConfiguration::class))
+@EnableAutoConfiguration(exclude = [MongoAutoConfiguration::class])
 @SpringBootApplication
-@ComponentScan(basePackageClasses = arrayOf(UserController::class, CardController::class, SearchController::class, SwaggerConfig::class))
+@ComponentScan(basePackageClasses = [UserController::class, CardController::class, SearchController::class, SwaggerConfig::class])
 open class Main : WebMvcConfigurerAdapter() {
     companion object {
         @JvmStatic

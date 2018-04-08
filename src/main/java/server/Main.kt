@@ -77,7 +77,7 @@ open class Main : WebMvcConfigurerAdapter() {
                 val key = arg.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
                 val value = arg.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
                 if (!argTypes.contains(key)) {
-                    throw IllegalArgumentException("Invalid argument: " + arg)
+                    throw IllegalArgumentException("Invalid argument: $arg")
                 }
                 argMap.replace(key, value)
                 if (key == "MONGO_PORT" || key == "ELASTICSEARCH_PORT") {

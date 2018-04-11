@@ -145,7 +145,7 @@ class ElasticClientTest {
         elasticClient.indexCardpack(cardpackTwo)
         elasticClient.indexCardpack(cardpackThree)
         elasticClient.indexCardpack(cardpackFour)
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         val searchedCardpacks = elasticClient.searchCardpacks("cardpack")
         val cardpackIds = searchedCardpacks.map { cardpack -> cardpack.id }.toSet()

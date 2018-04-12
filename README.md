@@ -1,13 +1,10 @@
 # Cards API
 
-# Mongo Kubernetes Replica Set Sidecar
-
-This project is as a PoC to setup a mongo replica set using Kubernetes. It should handle resizing of any type and be
-resilient to the various conditions both mongo and kubernetes can find themselves in.
+A dockerizable API for cards against humanity
 
 ## How to use it
 
-... TODO add description
+The project contains all configuration necesary to build a docker image by simply pulling the repo, opening up the main project folder in the command line, and running ```docker build .```
 
 ### Settings
 
@@ -19,3 +16,5 @@ resilient to the various conditions both mongo and kubernetes can find themselve
 | ELASTICSEARCH_HOST | NO | elasticsearch | Elasticsearch host |
 | ELASTICSEARCH_PORT | NO | 9200 | Elasticsearch port |
 | ALLOWED_CORS_ORIGIN | NO | http://locahost | String containing the allowed CORS origins |
+
+To set an environment variable, the following syntax must be followed: ```[VARIABLE_NAME]=[VALUE]```

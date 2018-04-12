@@ -10,10 +10,7 @@ before_script:
   - sleep 10
 
 script:
-  - mvn clean deploy
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-  - docker images
-  - docker push $DOCKER_USERNAME/cards-api
+  - mvn verify
 
 services:
   - mongodb

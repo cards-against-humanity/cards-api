@@ -96,7 +96,7 @@ class ElasticClientTest {
         elasticClient.indexUser(userTwo)
         elasticClient.indexUser(userThree)
         elasticClient.indexUser(userFour)
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         val searchedUsers = elasticClient.searchUsers("Tomm")
         val userIds = searchedUsers.map { user -> user.id }.toSet()
@@ -145,7 +145,7 @@ class ElasticClientTest {
         elasticClient.indexCardpack(cardpackTwo)
         elasticClient.indexCardpack(cardpackThree)
         elasticClient.indexCardpack(cardpackFour)
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         val searchedCardpacks = elasticClient.searchCardpacks("cardpack")
         val cardpackIds = searchedCardpacks.map { cardpack -> cardpack.id }.toSet()

@@ -78,10 +78,10 @@ open class Main : WebMvcConfigurerAdapter() {
 
         private fun parseArgs(args: Array<String>): Map<String, Any> {
             val argMap = HashMap<String, Any>()
-            argMap["MONGO_HOST"] = "mongodb"
+            argMap["MONGO_HOST"] = "localhost"
             argMap["MONGO_PORT"] = 27017
-            argMap["MONGO_DATABASE"] = "appName"
-            argMap["ELASTICSEARCH_HOST"] = "elasticsearch"
+            argMap["MONGO_DATABASE"] = "cardsOnline"
+            argMap["ELASTICSEARCH_HOST"] = "localhost"
             argMap["ELASTICSEARCH_PORT"] = 9200
             argMap["ALLOWED_CORS_ORIGIN"] = "http://localhost"
 

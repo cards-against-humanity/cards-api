@@ -10,10 +10,10 @@ The project contains all configuration necesary to build a docker image by simpl
 
 | Environment Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| MONGO_HOST | NO | mongodb | Mongodb host |
+| MONGO_HOST | NO | localhost | Mongodb host |
 | MONGO_PORT | NO | 27017 | Mongodb port |
-| MONGO_DATABASE | NO | appName | The name of the mongodb database to connect to |
-| ELASTICSEARCH_HOST | NO | elasticsearch | Elasticsearch host |
+| MONGO_DATABASE | NO | cardsOnline | The name of the mongodb database to connect to |
+| ELASTICSEARCH_HOST | NO | localhost | Elasticsearch host |
 | ELASTICSEARCH_PORT | NO | 9200 | Elasticsearch port |
 | ALLOWED_CORS_ORIGIN | NO | http://locahost | String containing the allowed CORS origins |
 

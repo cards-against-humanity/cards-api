@@ -8,6 +8,7 @@ import route.card.model.CardpackModel
 import route.card.model.WhiteCardModel
 import route.user.model.UserCollection
 import route.user.model.UserModel
+import java.util.*
 
 class MemoryCardCollection(private val userCollection: UserCollection) : CardCollection {
     private var cardpackId = 0
@@ -159,6 +160,7 @@ class MemoryCardCollection(private val userCollection: UserCollection) : CardCol
     private class MemoryCardpackModel(override val id: String, override var name: String, override val owner: UserModel) : CardpackModel {
         override val whiteCards: MutableList<WhiteCardModel> = ArrayList()
         override val blackCards: MutableList<BlackCardModel> = ArrayList()
+        override val createdAt = Date()
 
         override fun setName(name: String): CardpackModel {
             this.name = name

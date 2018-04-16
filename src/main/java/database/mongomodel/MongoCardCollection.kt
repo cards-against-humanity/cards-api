@@ -8,17 +8,20 @@ import route.card.JsonWhiteCard
 import route.card.model.*
 import route.user.model.UserCollection
 import route.user.model.UserModel
+import java.util.*
 
 class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<Document>, private val mongoCollectionWhiteCards: MongoCollection<Document>, private val mongoCollectionBlackCards: MongoCollection<Document>, private val userCollection: UserCollection) : CardCollection {
     override fun createCardpack(name: String, userId: String): CardpackModel {
         val user = userCollection.getUser(userId)
         val id = ObjectId()
+        val createdAt = Date()
         mongoCollectionCardpacks.insertOne(Document()
                 .append("_id", id)
                 .append("name", name)
                 .append("ownerId", userId)
+                .append("createdAt", createdAt)
         )
-        return MongoCardpackModel(id.toHexString(), name, user, ArrayList(), ArrayList(), mongoCollectionCardpacks)
+        return MongoCardpackModel(id.toHexString(), name, user, ArrayList(), ArrayList(), createdAt, mongoCollectionCardpacks)
     }
 
     override fun createWhiteCard(card: JsonWhiteCard, cardpackId: String): WhiteCardModel {
@@ -109,7 +112,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
             val cardpackDoc = mongoCollectionCardpacks.find(Document("_id", ObjectId(id))).first()
             val whiteCards = mongoCollectionWhiteCards.find(Document("cardpackId", id)).map { cardDoc -> MongoWhiteCardModel(cardDoc, mongoCollectionWhiteCards) }.toList()
             val blackCards = mongoCollectionBlackCards.find(Document("cardpackId", id)).map { cardDoc -> MongoBlackCardModel(cardDoc, mongoCollectionBlackCards) }.toList()
-            return MongoCardpackModel(id, cardpackDoc["name"] as String, userCollection.getUser(cardpackDoc["ownerId"] as String), whiteCards, blackCards, mongoCollectionCardpacks)
+            return MongoCardpackModel(id, cardpackDoc["name"] as String, userCollection.getUser(cardpackDoc["ownerId"] as String), whiteCards, blackCards, cardpackDoc["createdAt"] as Date, mongoCollectionCardpacks)
         } catch (e: Exception) {
             throw Exception("Cardpack does not exist with id: $id")
         }
@@ -122,7 +125,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
             val id = cardpackDoc["_id"] as ObjectId
             val whiteCards = mongoCollectionWhiteCards.find(Document("cardpackId", id.toHexString())).map { cardDoc -> MongoWhiteCardModel(cardDoc, mongoCollectionWhiteCards) }.toList()
             val blackCards = mongoCollectionBlackCards.find(Document("cardpackId", id.toHexString())).map { cardDoc -> MongoBlackCardModel(cardDoc, mongoCollectionBlackCards) }.toList()
-            MongoCardpackModel(id.toHexString(), cardpackDoc["name"] as String, user, whiteCards, blackCards, mongoCollectionCardpacks)
+            MongoCardpackModel(id.toHexString(), cardpackDoc["name"] as String, user, whiteCards, blackCards, cardpackDoc["createdAt"] as Date, mongoCollectionCardpacks)
         }
     }
 
@@ -132,6 +135,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
             override val owner: UserModel,
             override val whiteCards: List<WhiteCardModel>,
             override val blackCards: List<BlackCardModel>,
+            override val createdAt: Date,
             private val mongoCollectionCardpacks: MongoCollection<Document>) : CardpackModel {
 
         override fun setName(name: String): CardpackModel {

@@ -11,6 +11,8 @@ import route.card.JsonBlackCard
 import route.card.JsonWhiteCard
 import route.card.model.CardCollection
 import route.user.model.UserCollection
+import java.util.*
+import kotlin.test.assert
 
 class CardCollectionTest {
     private data class CollectionGroup(
@@ -412,6 +414,27 @@ class CardCollectionTest {
             card.setText("new_card_text")
             assertEquals("new_card_text", card.text)
             assertEquals("new_card_text", collections.cardCollection.getCardpack(cardpack.id).blackCards[0].text)
+        })}
+    }
+
+    @TestFactory
+    fun cardpackContainsCorrectTimestamp(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+
+            val threshold = 100
+            val expectedCreationTime = Date().time
+
+            val cardpack = collections.cardCollection.createCardpack("cardpack_name", user.id)
+            val actualCreationTime = cardpack.createdAt.time
+
+            assert(Math.abs(expectedCreationTime - actualCreationTime) < threshold)
+
+            assertEquals(actualCreationTime, cardpack.createdAt.time)
+            assertEquals(actualCreationTime, collections.cardCollection.getCardpack(cardpack.id).createdAt.time)
+            Thread.sleep(500)
+            assertEquals(actualCreationTime, cardpack.createdAt.time)
+            assertEquals(actualCreationTime, collections.cardCollection.getCardpack(cardpack.id).createdAt.time)
         })}
     }
 }

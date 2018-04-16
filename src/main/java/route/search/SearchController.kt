@@ -15,7 +15,7 @@ import route.user.model.UserModel
 @RestController
 class SearchController(private val searcher: ElasticSearcher) {
 
-    @RequestMapping(value = "/search/users", method = [RequestMethod.GET])
+    @RequestMapping(value = "/user/search", method = [RequestMethod.GET])
     @ApiOperation(value = "Get list of users by name")
     @ApiResponses(
             ApiResponse(code = 200, message = "User search succeeded"),
@@ -25,7 +25,7 @@ class SearchController(private val searcher: ElasticSearcher) {
         return ResponseEntity.ok(searcher.searchUsers(query))
     }
 
-    @RequestMapping(value = "/search/cardpacks", method = [RequestMethod.GET])
+    @RequestMapping(value = "/cardpack/search", method = [RequestMethod.GET])
     @ApiOperation(value = "Get list of cardpacks by name")
     @ApiResponses(
             ApiResponse(code = 200, message = "User search succeeded"),

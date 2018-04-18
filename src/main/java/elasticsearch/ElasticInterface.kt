@@ -13,3 +13,8 @@ interface ElasticSearcher {
     fun searchUsers(query: String): List<UserModel>
     fun searchCardpacks(query: String): List<CardpackModel>
 }
+
+interface ElasticAutoCompleter {
+    fun autoCompleteUserSearch(query: String): List<String>
+    fun autoCompleteCardpackSearch(query: String): List<String>
+}

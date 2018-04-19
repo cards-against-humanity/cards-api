@@ -8,8 +8,8 @@ import route.card.model.CardpackModel
 import route.user.model.UserModel
 import java.net.InetAddress
 
-class ElasticSearchableDatabaseCollection(private val superCollection: DatabaseCollection, elasticsearchHost: InetAddress, elasticsearchPort: Int) : DatabaseCollection by superCollection, ElasticSearcher, SearchableDatabaseCollection {
-    private val indexer = ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost(elasticsearchHost.hostAddress, elasticsearchPort))), superCollection)
+class ElasticSearchableDatabaseCollection(private val superCollection: DatabaseCollection, elasticsearchHost: InetAddress, elasticsearchPort: Int, timeoutDuration: Int) : DatabaseCollection by superCollection, ElasticSearcher, SearchableDatabaseCollection {
+    private val indexer = ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost(elasticsearchHost.hostAddress, elasticsearchPort))), superCollection, timeoutDuration)
 
     // TODO - Update name of users and cardpacks when they are changed
 

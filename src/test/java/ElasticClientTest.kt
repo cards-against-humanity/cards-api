@@ -18,7 +18,7 @@ class ElasticClientTest {
 
     private var database: DatabaseCollection = MemoryDatabaseCollection()
     private val elasticRestClient = RestHighLevelClient(RestClient.builder(HttpHost("localhost", 9200)))
-    private var elasticClient = ElasticClient(elasticRestClient, database)
+    private var elasticClient = ElasticClient(elasticRestClient, database, 1000)
 
     @BeforeEach
     fun reset() {
@@ -35,13 +35,13 @@ class ElasticClientTest {
         try {
             elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.cardpackAutocompleteIndex))
         } catch (e: Exception) { }
-        elasticClient = ElasticClient(elasticRestClient, database)
+        elasticClient = ElasticClient(elasticRestClient, database, 1000)
     }
 
     @Test
     fun connectionTimeout() {
         val startTime = Date().time
-        val e = assertThrows(SocketException::class.java) { ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost("localhost", 12345))), database) }
+        val e = assertThrows(SocketException::class.java) { ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost("localhost", 12345))), database, 5000) }
         assertEquals("Could not connect to Elasticsearch", e.message)
         assert(Date().time - startTime > 5000)
     }

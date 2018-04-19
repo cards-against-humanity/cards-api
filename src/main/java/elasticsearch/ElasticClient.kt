@@ -18,7 +18,7 @@ import java.net.SocketException
 import java.util.*
 
 
-class ElasticClient(private val elasticClient: RestHighLevelClient, private val database: DatabaseCollection) : ElasticIndexer, ElasticSearcher, ElasticAutoCompleter {
+class ElasticClient(private val elasticClient: RestHighLevelClient, private val database: DatabaseCollection, timeoutDuration: Int) : ElasticIndexer, ElasticSearcher, ElasticAutoCompleter {
     companion object {
         const val userIndex = "user"
         const val userAutocompleteIndex = "userautocomplete"
@@ -27,7 +27,7 @@ class ElasticClient(private val elasticClient: RestHighLevelClient, private val 
     }
 
     init {
-        createIndices()
+        createIndices(timeoutDuration)
     }
 
     override fun indexUser(user: UserModel) {
@@ -76,8 +76,8 @@ class ElasticClient(private val elasticClient: RestHighLevelClient, private val 
         return cardpackIds.map { id -> database.getCardpack(id).name } // TODO - Make this more efficient
     }
 
-    private fun createIndices() {
-        waitForConnection(5000)
+    private fun createIndices(timeoutDuration: Int) {
+        waitForConnection(timeoutDuration)
         try {
             createAutocompleteIndex(userAutocompleteIndex)
         } catch (e: Exception) { }

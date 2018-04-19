@@ -9,6 +9,9 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.action.get.GetRequest
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
+import org.junit.jupiter.api.Assertions.assertThrows
+import java.net.SocketException
+import java.util.*
 import kotlin.test.assertEquals
 
 class ElasticClientTest {
@@ -33,6 +36,14 @@ class ElasticClientTest {
             elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.cardpackAutocompleteIndex))
         } catch (e: Exception) { }
         elasticClient = ElasticClient(elasticRestClient, database)
+    }
+
+    @Test
+    fun connectionTimeout() {
+        val startTime = Date().time
+        val e = assertThrows(SocketException::class.java) { ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost("localhost", 12345))), database) }
+        assertEquals("Could not connect to Elasticsearch", e.message)
+        assert(Date().time - startTime > 5000)
     }
 
     @Test
@@ -111,6 +122,12 @@ class ElasticClientTest {
     }
 
     @Test
+    fun userSearchNoIndexedData() {
+        val searchedUsers = elasticClient.searchUsers("Tommy")
+        assertEquals(0, searchedUsers.size)
+    }
+
+    @Test
     fun exactCardpackSearch() {
         val user = database.createUser("Tommy", "1234", "google")
         val cardpackOne = database.createCardpack("cardpackOne", user.id)
@@ -161,6 +178,12 @@ class ElasticClientTest {
     }
 
     @Test
+    fun cardpackSearchNoIndexedData() {
+        val searchedCardpacks = elasticClient.searchCardpacks("cardpackOne")
+        assertEquals(0, searchedCardpacks.size)
+    }
+
+    @Test
     fun userAutocomplete() {
         val userOne = database.createUser("Tommy Volk", "1234", "google")
         val userTwo = database.createUser("Charlie Strange", "4321", "google")
@@ -191,6 +214,12 @@ class ElasticClientTest {
     }
 
     @Test
+    fun userAutocompleteNoIndexedData() {
+        val cardpackNames = elasticClient.autoCompleteUserSearch("a")
+        assertEquals(0, cardpackNames.size)
+    }
+
+    @Test
     fun cardpackAutocomplete() {
         val user = database.createUser("Tommy", "1234", "google")
         val cardpackOne = database.createCardpack("asdf", user.id)
@@ -207,5 +236,11 @@ class ElasticClientTest {
         assertEquals(2, cardpackNames.size)
         assert(cardpackNames.contains("asdf"))
         assert(cardpackNames.contains("aaaa"))
+    }
+
+    @Test
+    fun cardpackAutocompleteNoIndexedData() {
+        val cardpackNames = elasticClient.autoCompleteCardpackSearch("a")
+        assertEquals(0, cardpackNames.size)
     }
 }

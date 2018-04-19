@@ -37,4 +37,12 @@ class ElasticSearchableDatabaseCollection(private val superCollection: DatabaseC
         indexer.unindexCardpack(id)
         superCollection.deleteCardpack(id)
     }
+
+    override fun autoCompleteUserSearch(query: String): List<String> {
+        return indexer.autoCompleteUserSearch(query)
+    }
+
+    override fun autoCompleteCardpackSearch(query: String): List<String> {
+        return indexer.autoCompleteCardpackSearch(query)
+    }
 }

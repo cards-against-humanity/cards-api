@@ -3,6 +3,8 @@ package elasticsearch
 import database.DatabaseCollection
 import org.apache.http.entity.BasicHttpEntity
 import org.apache.http.message.BasicHeader
+import org.elasticsearch.ElasticsearchStatusException
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
 import org.elasticsearch.action.delete.DeleteRequest
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.SearchRequest
@@ -12,6 +14,8 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import route.card.model.CardpackModel
 import route.user.model.UserModel
+import java.net.SocketException
+import java.util.*
 
 
 class ElasticClient(private val elasticClient: RestHighLevelClient, private val database: DatabaseCollection) : ElasticIndexer, ElasticSearcher, ElasticAutoCompleter {
@@ -23,12 +27,7 @@ class ElasticClient(private val elasticClient: RestHighLevelClient, private val 
     }
 
     init {
-        try {
-            setupAutocomplete(userAutocompleteIndex)
-        } catch (e: Exception) { }
-        try {
-            setupAutocomplete(cardpackAutocompleteIndex)
-        } catch (e: Exception) { }
+        createIndices()
     }
 
     override fun indexUser(user: UserModel) {
@@ -77,7 +76,41 @@ class ElasticClient(private val elasticClient: RestHighLevelClient, private val 
         return cardpackIds.map { id -> database.getCardpack(id).name } // TODO - Make this more efficient
     }
 
-    private fun setupAutocomplete(index: String) {
+    private fun createIndices() {
+        waitForConnection(5000)
+        try {
+            createAutocompleteIndex(userAutocompleteIndex)
+        } catch (e: Exception) { }
+        try {
+            createAutocompleteIndex(cardpackAutocompleteIndex)
+        } catch (e: Exception) { }
+        try {
+            elasticClient.indices().create(CreateIndexRequest(userIndex))
+        } catch (e: ElasticsearchStatusException) { println(e.message) }
+        try {
+            elasticClient.indices().create(CreateIndexRequest(cardpackIndex))
+        } catch (e: Exception) { }
+    }
+
+    private fun waitForConnection(timeoutDuration: Int) {
+        if (timeoutDuration <= 0 ) {
+            throw Exception("Timeout duration must be positive")
+        }
+        val startTime = Date()
+        while (true) {
+            if (Date().time - startTime.time > timeoutDuration) {
+                throw SocketException("Could not connect to Elasticsearch")
+            }
+            try {
+                if (elasticClient.ping()) {
+                    break
+                }
+            } catch (e: Exception) { }
+            Thread.yield()
+        }
+    }
+
+    private fun createAutocompleteIndex(index: String) {
         // TODO - Check if index exists and add error handling
         var httpEntity = BasicHttpEntity()
         httpEntity.content = (

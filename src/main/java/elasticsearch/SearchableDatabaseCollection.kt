@@ -2,4 +2,4 @@ package elasticsearch
 
 import database.DatabaseCollection
 
-interface SearchableDatabaseCollection : DatabaseCollection, ElasticSearcher
+interface SearchableDatabaseCollection : DatabaseCollection, ElasticSearcher, ElasticAutoCompleter

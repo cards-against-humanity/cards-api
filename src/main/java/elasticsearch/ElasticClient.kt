@@ -97,15 +97,19 @@ class ElasticClient(private val elasticClient: RestHighLevelClient, private val 
             throw Exception("Timeout duration must be positive")
         }
         val startTime = Date()
+        var lastPinged = Date(0)
         while (true) {
+            if (Date().time - lastPinged.time > 1000) {
+                lastPinged = Date()
+                try {
+                    if (elasticClient.ping()) {
+                        break
+                    }
+                } catch (e: Exception) { }
+            }
             if (Date().time - startTime.time > timeoutDuration) {
                 throw SocketException("Could not connect to Elasticsearch")
             }
-            try {
-                if (elasticClient.ping()) {
-                    break
-                }
-            } catch (e: Exception) { }
             Thread.yield()
         }
     }

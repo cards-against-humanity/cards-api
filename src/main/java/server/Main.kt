@@ -44,7 +44,7 @@ open class Main : WebMvcConfigurerAdapter() {
         val address = InetAddress.getByName(args.mongoHost)
         val databaseName = args.mongoDatabase
         val db = MongoClient(ServerAddress(address, args.mongoPort)).getDatabase(databaseName)
-        return ElasticSearchableDatabaseCollection(MongoDatabaseCollection(db), InetAddress.getByName(args.elasticsearchHost), args.elasticsearchPort)
+        return ElasticSearchableDatabaseCollection(MongoDatabaseCollection(db), InetAddress.getByName(args.elasticsearchHost), args.elasticsearchPort, 30000)
     }
 
     @Bean

@@ -9,13 +9,16 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.action.get.GetRequest
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
+import org.junit.jupiter.api.Assertions.assertThrows
+import java.net.SocketException
+import java.util.*
 import kotlin.test.assertEquals
 
 class ElasticClientTest {
 
     private var database: DatabaseCollection = MemoryDatabaseCollection()
     private val elasticRestClient = RestHighLevelClient(RestClient.builder(HttpHost("localhost", 9200)))
-    private var elasticClient = ElasticClient(elasticRestClient, database)
+    private var elasticClient = ElasticClient(elasticRestClient, database, 1000)
 
     @BeforeEach
     fun reset() {
@@ -24,11 +27,23 @@ class ElasticClientTest {
             elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.userIndex))
         } catch (e: Exception) { }
         try {
+        elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.userAutocompleteIndex))
+        } catch (e: Exception) { }
+        try {
             elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.cardpackIndex))
         } catch (e: Exception) { }
-        elasticRestClient.indices().create(CreateIndexRequest(ElasticClient.userIndex))
-        elasticRestClient.indices().create(CreateIndexRequest(ElasticClient.cardpackIndex))
-        elasticClient = ElasticClient(elasticRestClient, database)
+        try {
+            elasticRestClient.indices().delete(DeleteIndexRequest(ElasticClient.cardpackAutocompleteIndex))
+        } catch (e: Exception) { }
+        elasticClient = ElasticClient(elasticRestClient, database, 1000)
+    }
+
+    @Test
+    fun connectionTimeout() {
+        val startTime = Date().time
+        val e = assertThrows(SocketException::class.java) { ElasticClient(RestHighLevelClient(RestClient.builder(HttpHost("localhost", 12345))), database, 5000) }
+        assertEquals("Could not connect to Elasticsearch", e.message)
+        assert(Date().time - startTime > 5000)
     }
 
     @Test
@@ -107,6 +122,12 @@ class ElasticClientTest {
     }
 
     @Test
+    fun userSearchNoIndexedData() {
+        val searchedUsers = elasticClient.searchUsers("Tommy")
+        assertEquals(0, searchedUsers.size)
+    }
+
+    @Test
     fun exactCardpackSearch() {
         val user = database.createUser("Tommy", "1234", "google")
         val cardpackOne = database.createCardpack("cardpackOne", user.id)
@@ -154,5 +175,72 @@ class ElasticClientTest {
         assert(cardpackIds.contains(cardpackTwo.id))
         assert(cardpackIds.contains(cardpackThree.id))
         assert(cardpackIds.contains(cardpackFour.id))
+    }
+
+    @Test
+    fun cardpackSearchNoIndexedData() {
+        val searchedCardpacks = elasticClient.searchCardpacks("cardpackOne")
+        assertEquals(0, searchedCardpacks.size)
+    }
+
+    @Test
+    fun userAutocomplete() {
+        val userOne = database.createUser("Tommy Volk", "1234", "google")
+        val userTwo = database.createUser("Charlie Strange", "4321", "google")
+        val userThree = database.createUser("Tommy Strange", "12", "google")
+        val userFour = database.createUser("Tommy Kohnen", "34", "google")
+        elasticClient.indexUser(userOne)
+        elasticClient.indexUser(userTwo)
+        elasticClient.indexUser(userThree)
+        elasticClient.indexUser(userFour)
+        Thread.sleep(2000)
+
+        var searchedUserNames: List<String>
+
+        searchedUserNames = elasticClient.autoCompleteUserSearch("T")
+        assertEquals(3, searchedUserNames.size)
+        assert(searchedUserNames.contains("Tommy Volk"))
+        assert(searchedUserNames.contains("Tommy Strange"))
+        assert(searchedUserNames.contains("Tommy Kohnen"))
+
+        searchedUserNames = elasticClient.autoCompleteUserSearch("V")
+        assertEquals(1, searchedUserNames.size)
+        assert(searchedUserNames.contains("Tommy Volk"))
+
+        searchedUserNames = elasticClient.autoCompleteUserSearch("Str")
+        assertEquals(2, searchedUserNames.size)
+        assert(searchedUserNames.contains("Tommy Strange"))
+        assert(searchedUserNames.contains("Charlie Strange"))
+    }
+
+    @Test
+    fun userAutocompleteNoIndexedData() {
+        val cardpackNames = elasticClient.autoCompleteUserSearch("a")
+        assertEquals(0, cardpackNames.size)
+    }
+
+    @Test
+    fun cardpackAutocomplete() {
+        val user = database.createUser("Tommy", "1234", "google")
+        val cardpackOne = database.createCardpack("asdf", user.id)
+        val cardpackTwo = database.createCardpack("aaaa", user.id)
+        val cardpackThree = database.createCardpack("fdfd", user.id)
+        val cardpackFour = database.createCardpack("rrew", user.id)
+        elasticClient.indexCardpack(cardpackOne)
+        elasticClient.indexCardpack(cardpackTwo)
+        elasticClient.indexCardpack(cardpackThree)
+        elasticClient.indexCardpack(cardpackFour)
+        Thread.sleep(2000)
+
+        val cardpackNames = elasticClient.autoCompleteCardpackSearch("a")
+        assertEquals(2, cardpackNames.size)
+        assert(cardpackNames.contains("asdf"))
+        assert(cardpackNames.contains("aaaa"))
+    }
+
+    @Test
+    fun cardpackAutocompleteNoIndexedData() {
+        val cardpackNames = elasticClient.autoCompleteCardpackSearch("a")
+        assertEquals(0, cardpackNames.size)
     }
 }

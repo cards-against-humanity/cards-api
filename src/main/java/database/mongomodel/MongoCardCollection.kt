@@ -145,7 +145,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
         }
     }
 
-    private class MongoWhiteCardModel(override val id: String, override var text: String, override val cardpackId: String, val mongoCollectionWhiteCards: MongoCollection<Document>) : WhiteCardModel {
+    private class MongoWhiteCardModel(override val id: String, override var text: String, override val cardpackId: String, private val mongoCollectionWhiteCards: MongoCollection<Document>) : WhiteCardModel {
         constructor(json: Document, mongoCollectionWhiteCards: MongoCollection<Document>) : this((json["_id"] as ObjectId).toHexString(), json["text"] as String, json["cardpackId"] as String, mongoCollectionWhiteCards)
 
         override fun setText(text: String): WhiteCardModel {
@@ -155,7 +155,7 @@ class MongoCardCollection(private val mongoCollectionCardpacks: MongoCollection<
         }
     }
 
-    private class MongoBlackCardModel(override val id: String, override var text: String, override val answerFields: Int, override val cardpackId: String, val mongoCollectionBlackCards: MongoCollection<Document>) : BlackCardModel {
+    private class MongoBlackCardModel(override val id: String, override var text: String, override val answerFields: Int, override val cardpackId: String, private val mongoCollectionBlackCards: MongoCollection<Document>) : BlackCardModel {
         constructor(json: Document, mongoCollectionBlackCards: MongoCollection<Document>) : this((json["_id"] as ObjectId).toHexString(), json["text"] as String, json["answerFields"] as Int, json["cardpackId"] as String, mongoCollectionBlackCards)
 
         override fun setText(text: String): BlackCardModel {

@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -435,6 +436,23 @@ class CardCollectionTest {
             Thread.sleep(500)
             assertEquals(actualCreationTime, cardpack.createdAt.time)
             assertEquals(actualCreationTime, collections.cardCollection.getCardpack(cardpack.id).createdAt.time)
+        })}
+    }
+
+    @TestFactory
+    fun convertCardpackToJson(): List<DynamicTest> {
+        return collections.map { collections -> DynamicTest.dynamicTest(collections.cardCollection::class.java.toString(), {
+            val user = collections.userCollection.createUser("user", "1234", "google")
+
+            val cardpack = collections.cardCollection.createCardpack("cardpack_one", user.id)
+            collections.cardCollection.createWhiteCard(JsonWhiteCard("card_one"), cardpack.id)
+            collections.cardCollection.createBlackCard(JsonBlackCard("card_two", 1), cardpack.id)
+
+            try {
+                ObjectMapper().writeValueAsString(collections.cardCollection.getCardpack(cardpack.id))
+            } catch (e: Exception) {
+                throw Error("Expected not to throw!", e)
+            }
         })}
     }
 }

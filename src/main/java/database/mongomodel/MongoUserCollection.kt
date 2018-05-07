@@ -20,7 +20,7 @@ class MongoUserCollection(val mongoCollection: MongoCollection<Document>) : User
             throw Exception("User does not exist with id: $id")
         }
         val id = doc["_id"] as ObjectId
-        return MongoUserModel(id.toHexString(), doc["name"] as String, doc["oAuthId"] as String, doc["oAuthProvider"] as String, mongoCollection)
+        return MongoUserModel(id.toHexString(), doc["name"] as String, mongoCollection)
     }
 
     override fun getUsers(ids: List<String>): List<UserModel> {
@@ -35,7 +35,7 @@ class MongoUserCollection(val mongoCollection: MongoCollection<Document>) : User
             throw Exception("User does not exist with oAuthId of $oAuthId and oAuthProvider of $oAuthProvider")
         }
         val id = doc["_id"] as ObjectId
-        return MongoUserModel(id.toHexString(), doc["name"] as String, doc["oAuthId"] as String, doc["oAuthProvider"] as String, mongoCollection)
+        return MongoUserModel(id.toHexString(), doc["name"] as String, mongoCollection)
     }
 
     override fun createUser(name: String, oAuthId: String, oAuthProvider: String): UserModel {
@@ -53,7 +53,7 @@ class MongoUserCollection(val mongoCollection: MongoCollection<Document>) : User
         return getUser(id.toHexString())
     }
 
-    private class MongoUserModel(override val id: String, override var name: String, override val oAuthId: String, override val oAuthProvider: String, private val mongoCollection: MongoCollection<Document>) : UserModel {
+    private class MongoUserModel(override val id: String, override var name: String, private val mongoCollection: MongoCollection<Document>) : UserModel {
         override fun setName(name: String): UserModel {
             mongoCollection.updateOne(Document("_id", ObjectId(id)), Document("\$set", Document("name", name)))
             this.name = name

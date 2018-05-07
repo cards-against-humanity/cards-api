@@ -21,8 +21,6 @@ class UserCollectionTest {
         return collections.map { userCollection -> DynamicTest.dynamicTest(userCollection::class.java.toString(), {
             val user = userCollection.createUser("test_name", "1234", "google")
             assertEquals("test_name", user.name)
-            assertEquals("1234", user.oAuthId)
-            assertEquals("google", user.oAuthProvider)
         })}
     }
 
@@ -57,7 +55,7 @@ class UserCollectionTest {
     fun getExistingUserByOAuth(): List<DynamicTest> {
         return collections.map { userCollection -> DynamicTest.dynamicTest(userCollection::class.java.toString(), {
             val userOne = userCollection.createUser("name", "1234", "google")
-            val userTwo = userCollection.getUser(userOne.oAuthId, userOne.oAuthProvider)
+            val userTwo = userCollection.getUser("1234", "google")
             assert(usersAreEqual(userOne, userTwo))
         })}
     }
@@ -93,7 +91,6 @@ class UserCollectionTest {
             val users = userCollection.getUsers(userIds)
             users.forEachIndexed { i, userModel ->
                 assertEquals("name$i", userModel.name)
-                assertEquals(i.toString(), userModel.oAuthId)
             }
         })}
     }

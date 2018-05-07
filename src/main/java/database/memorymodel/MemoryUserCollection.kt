@@ -4,7 +4,7 @@ import route.user.model.UserCollection
 import route.user.model.UserModel
 
 class MemoryUserCollection : UserCollection {
-    private val users: MutableMap<String, UserModel> = HashMap()
+    private val users: MutableMap<String, MemoryUserModel> = HashMap()
 
     override fun getUser(id: String): UserModel {
         val user = users[id]
@@ -31,12 +31,12 @@ class MemoryUserCollection : UserCollection {
         if (users.filterValues { user -> user.oAuthId == oAuthId && user.oAuthProvider == oAuthProvider }.isNotEmpty()) {
             throw Exception("User already exists with that oAuth ID and provider")
         }
-        val model = MemoryUserModel(users.size.toString(), name, oAuthId, oAuthProvider) as UserModel
+        val model = MemoryUserModel(users.size.toString(), name, oAuthId, oAuthProvider)
         users[model.id] = model
         return model
     }
 
-    private class MemoryUserModel(override val id: String, override var name: String, override val oAuthId: String, override val oAuthProvider: String) : UserModel {
+    private class MemoryUserModel(override val id: String, override var name: String, val oAuthId: String, val oAuthProvider: String) : UserModel {
         override fun setName(name: String): UserModel {
             this.name = name
             return this

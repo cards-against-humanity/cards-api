@@ -21,8 +21,13 @@ class UserControllerTest {
 
     private var mockMvc = MockMvcBuilders.standaloneSetup(UserController(database)).build()
 
-    private var userOne = database.createUser("Quinn", "4321", "google")
-    private var userTwo = database.createUser("Charlie", "1234", "google")
+    private val userOneOAuthId = "4321"
+    private val userTwoOAuthId = "1234"
+    private val userOneOAuthProvider = "google"
+    private val userTwoOAuthProvider = "google"
+
+    private var userOne = database.createUser("Quinn", userOneOAuthId, userOneOAuthProvider)
+    private var userTwo = database.createUser("Charlie", userTwoOAuthId, userTwoOAuthProvider)
 
     @BeforeEach
     fun reset() {
@@ -56,26 +61,26 @@ class UserControllerTest {
         result = mockMvc.perform(getReq).andExpect(status().isOk)
         assert(resEquals(result, userTwo))
 
-        getReq = get("/user").param("oAuthId", userTwo.oAuthId).param("oAuthProvider", userTwo.oAuthProvider)
+        getReq = get("/user").param("oAuthId", userTwoOAuthId).param("oAuthProvider", userTwoOAuthProvider)
         result = mockMvc.perform(getReq).andExpect(status().isOk)
         assert(resEquals(result, userTwo))
 
         getReq = get("/user")
         mockMvc.perform(getReq).andExpect(status().isBadRequest)
 
-        getReq = get("/user").param("oAuthId", userTwo.oAuthId)
+        getReq = get("/user").param("oAuthId", userTwoOAuthId)
         mockMvc.perform(getReq).andExpect(status().isBadRequest)
 
-        getReq = get("/user").param("oAuthProvider", userTwo.oAuthProvider)
+        getReq = get("/user").param("oAuthProvider", userTwoOAuthProvider)
         mockMvc.perform(getReq).andExpect(status().isBadRequest)
 
-        getReq = get("/user").param("oAuthId", userTwo.oAuthId).param("oAuthProvider", userTwo.oAuthProvider).param("id", userTwo.id)
+        getReq = get("/user").param("oAuthId", userTwoOAuthId).param("oAuthProvider", userTwoOAuthProvider).param("id", userTwo.id)
         mockMvc.perform(getReq).andExpect(status().isBadRequest)
 
         getReq = get("/user").param("id", "thisisafakeid")
         mockMvc.perform(getReq).andExpect(status().isNotFound)
 
-        getReq = get("/user").param("oAuthId", userTwo.oAuthId).param("oAuthProvider", "fakeoauthprovider")
+        getReq = get("/user").param("oAuthId", userTwoOAuthId).param("oAuthProvider", "fakeoauthprovider")
         mockMvc.perform(getReq).andExpect(status().isNotFound)
     }
 

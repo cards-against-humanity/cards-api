@@ -101,9 +101,7 @@ fun resEquals(result: ResultActions, obj: Any): Boolean {
 
 fun usersAreEqual(userOne: UserModel, userTwo: UserModel): Boolean {
     return userOne.id == userTwo.id &&
-            userOne.name == userTwo.name &&
-            userOne.oAuthId == userTwo.oAuthId &&
-            userOne.oAuthProvider == userTwo.oAuthProvider
+            userOne.name == userTwo.name
 }
 
 

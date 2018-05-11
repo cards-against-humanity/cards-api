@@ -115,14 +115,14 @@ class CardController(private val database: DatabaseCollection) {
             ApiResponse(code = 400, message = "Invalid request body"),
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
-    fun createWhiteCards(@RequestBody cards: List<JsonWhiteCard>, @PathVariable id: String): ResponseEntity<Void> {
+    fun createWhiteCards(@RequestBody cards: List<JsonWhiteCard>, @PathVariable id: String): ResponseEntity<List<WhiteCardModel>> {
         try {
             database.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
-        database.createWhiteCards(cards, id)
-        return ResponseEntity.ok().build()
+        val cards = database.createWhiteCards(cards, id)
+        return ResponseEntity.ok(cards)
     }
 
     @RequestMapping(value = "/cardpack/{id}/cards/black", method = [RequestMethod.PUT])
@@ -132,14 +132,14 @@ class CardController(private val database: DatabaseCollection) {
             ApiResponse(code = 400, message = "Invalid request body"),
             ApiResponse(code = 404, message = "Cardpack does not exist")
     )
-    fun createBlackCards(@RequestBody cards: List<JsonBlackCard>, @PathVariable id: String): ResponseEntity<Void> {
+    fun createBlackCards(@RequestBody cards: List<JsonBlackCard>, @PathVariable id: String): ResponseEntity<List<BlackCardModel>> {
         try {
             database.getCardpack(id)
         } catch (e: Exception) {
             return ResponseEntity.notFound().build()
         }
-        database.createBlackCards(cards, id)
-        return ResponseEntity.ok().build()
+        val cards = database.createBlackCards(cards, id)
+        return ResponseEntity.ok(cards)
     }
 
     @RequestMapping(value = "/cards/white/{id}", method = [RequestMethod.DELETE])

@@ -1,18 +1,19 @@
 package server
 
+import com.coxautodev.graphql.tools.GraphQLQueryResolver
 import com.mongodb.MongoClient
 import com.mongodb.ServerAddress
 import config.SwaggerConfig
 import database.mongomodel.MongoDatabaseCollection
 import elasticsearch.ElasticSearchableDatabaseCollection
 import elasticsearch.SearchableDatabaseCollection
-import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.stereotype.Component
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import route.AuthInterceptor
@@ -20,7 +21,6 @@ import route.card.CardController
 import route.search.SearchController
 import route.user.UserController
 import java.net.InetAddress
-import java.util.*
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
@@ -59,5 +59,10 @@ open class Main : WebMvcConfigurerAdapter() {
     @Bean
     open fun getArgs(): Args {
         return Args()
+    }
+
+    @Component
+    class Query(private val db: SearchableDatabaseCollection) : GraphQLQueryResolver {
+        fun getUser(id: String) = db.getUser(id)
     }
 }

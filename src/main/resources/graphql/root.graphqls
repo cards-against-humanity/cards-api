@@ -1,0 +1,11 @@
+type Query {
+    getUser(id: String!): User
+}
+
+type User {
+    id: String!
+    name: String!
+    friends: [User]!
+    friendRequestsSent: [User]!
+    friendRequestsReceived: [User]!
+}

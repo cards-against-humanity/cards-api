@@ -7,4 +7,5 @@ open class Args {
     val elasticsearchHost: String = System.getenv("ELASTICSEARCH_HOST") ?: "localhost"
     val elasticsearchPort: Int = try { System.getenv("ELASTICSEARCH_PORT").toInt() } catch (e: Exception) { 9200 }
     val allowedCorsOrigin: String = System.getenv("ALLOWED_CORS_ORIGIN") ?: "http://localhost"
+    val jwtSecret: String = System.getenv("JWT_SECRET") ?: throw Exception("Missing environment variable: JWT_SECRET")
 }

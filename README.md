@@ -4,7 +4,9 @@ A dockerizable API for cards against humanity
 
 ## How to use it
 
-The project contains all configuration necessary to build a docker image by simply pulling the repo, opening up the main project folder in the command line, and running ```docker build .```
+### Building the Docker Image
+
+All dependencies, including Java and Maven, are handled within docker build stages. All that is needed is the source code and docker itself. To build it, simply pull the repo, navigate to the main project folder in the command line, and run ```docker build .```
 
 ### Settings
 

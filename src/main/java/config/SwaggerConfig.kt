@@ -24,7 +24,7 @@ open class SwaggerConfig {
     private fun metaData(): ApiInfo {
         return ApiInfo(
                 "Spring Boot REST API",
-                "Spring Boot REST API for Online Store",
+                "Spring Boot REST API for Cards Against Humanity",
                 "1.0",
                 "Terms of service",
                 Contact("Tommy Volk", "https://github.com/tvolk131/", "tvolk131@gmail.com"),

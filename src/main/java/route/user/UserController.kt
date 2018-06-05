@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiResponses
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import database.DatabaseCollection
+import route.BadRequestException
 import route.JsonPatchItem
+import route.NotFoundException
 import route.user.model.UserModel
 
 @RestController
@@ -39,11 +41,11 @@ class UserController(private val database: DatabaseCollection) {
             @RequestParam(value = "oAuthId", required = false) oAuthId: String?
     ): ResponseEntity<UserModel> {
         if ((oAuthProvider == null) xor (oAuthId == null)) {
-            return ResponseEntity.badRequest().build()
+            throw BadRequestException("Must include values for both oAuthId and oAuthProvider")
         } else if (id == null && oAuthProvider == null) {
-            return ResponseEntity.badRequest().build()
+            throw BadRequestException("Cannot query user by ID and oAuth")
         } else if (id != null && oAuthProvider != null) {
-            return ResponseEntity.badRequest().build()
+            throw BadRequestException("Must provide either oAuth information or user ID to search for a unique user")
         }
 
         return try {
@@ -53,7 +55,7 @@ class UserController(private val database: DatabaseCollection) {
                 ResponseEntity.ok(database.getUser(id!!))
             }
         } catch (e: Exception) {
-            ResponseEntity.notFound().build()
+            throw NotFoundException("User not found")
         }
 
     }

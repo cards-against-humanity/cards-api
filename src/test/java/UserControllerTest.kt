@@ -12,8 +12,9 @@ import route.user.UserController
 import java.util.ArrayList
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import database.memorymodel.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import kotlin.test.assertEquals
 
 class UserControllerTest {
 
@@ -66,29 +67,19 @@ class UserControllerTest {
         assert(resEquals(result, userTwo))
 
         getReq = get("/user")
-        mockMvc.perform(getReq).andExpect(status().isBadRequest)
-
-        getReq = get("/user").param("oAuthId", userTwoOAuthId)
-        mockMvc.perform(getReq).andExpect(status().isBadRequest)
-
-        getReq = get("/user").param("oAuthProvider", userTwoOAuthProvider)
-        mockMvc.perform(getReq).andExpect(status().isBadRequest)
-
-        getReq = get("/user").param("oAuthId", userTwoOAuthId).param("oAuthProvider", userTwoOAuthProvider).param("id", userTwo.id)
-        mockMvc.perform(getReq).andExpect(status().isBadRequest)
+        result = mockMvc.perform(getReq).andExpect(status().isBadRequest)
+        assertEquals("Cannot query user by ID and oAuth", result.andReturn().resolvedException.message)
 
         getReq = get("/user").param("id", "thisisafakeid")
-        mockMvc.perform(getReq).andExpect(status().isNotFound)
-
-        getReq = get("/user").param("oAuthId", userTwoOAuthId).param("oAuthProvider", "fakeoauthprovider")
-        mockMvc.perform(getReq).andExpect(status().isNotFound)
+        result = mockMvc.perform(getReq).andExpect(status().isNotFound)
+        assertEquals("User not found", result.andReturn().resolvedException.message)
     }
 
     @Test
     @Throws(Exception::class)
     fun putUser() {
         var putReq: MockHttpServletRequestBuilder
-        val result: ResultActions
+        var result: ResultActions
         val userDoc: Document = Document()
                 .append("name", "Hulk Hogan")
                 .append("oAuthId", "123456")
@@ -100,25 +91,30 @@ class UserControllerTest {
         resEquals(result, createdUser)
 
         putReq = put("/user").contentType(MediaType.APPLICATION_JSON).content(userDoc.toJson())
-        mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        result = mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        assertEquals("User already exists", result.andReturn().resolvedException.message)
     }
 
     @Test
     @Throws(Exception::class)
     fun addFriend() {
         var putReq: MockHttpServletRequestBuilder
+        var result: ResultActions
 
         putReq = put("/user/" + userOne.id + "/friends/" + userTwo.id)
         mockMvc.perform(putReq).andExpect(status().isOk)
 
         putReq = put("/user/" + userOne.id + "/friends/" + userTwo.id)
-        mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        result = mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        assertEquals("Either a friend request has been sent to this user or these users are currently friends", result.andReturn().resolvedException.message)
 
         putReq = put("/user/" + "thisisafakeid" + "/friends/" + userTwo.id)
-        mockMvc.perform(putReq).andExpect(status().isNotFound)
+        result = mockMvc.perform(putReq).andExpect(status().isNotFound)
+        assertEquals("The sending or receiving user does not exist", result.andReturn().resolvedException.message)
 
         putReq = put("/user/" + userOne.id + "/friends/" + userOne.id)
-        mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        result = mockMvc.perform(putReq).andExpect(status().isBadRequest)
+        assertEquals("Cannot send friend request to yourself", result.andReturn().resolvedException.message)
     }
 
     @Test
